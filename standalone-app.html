@@ -1,0 +1,3214 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIFTP Vaternity Hospital Management System - Interactive Demo</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & Noto Sans Arabic for Sindhi -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            siftp: {
+              navy: '#0F385E',
+              dark: '#0A2540',
+              teal: '#00A896',
+              tealDark: '#028090',
+              accent: '#02C39A',
+              lightBg: '#F4F7FB',
+              card: '#FFFFFF',
+              border: '#E2E8F0'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            sindhi: ['"Noto Naskh Arabic"', 'Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --siftp-navy: #0F385E;
+      --siftp-teal: #00A896;
+      --siftp-light: #F4F7FB;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--siftp-light);
+      -webkit-tap-highlight-color: transparent;
+    }
+    body[dir="rtl"] {
+      font-family: 'Noto Naskh Arabic', 'Inter', sans-serif;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    /* Printable Receipt Styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printModalContent, #printModalContent * {
+        visibility: visible;
+      }
+      #printModalContent {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    /* Smooth Transitions */
+    .fade-enter {
+      animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col selection:bg-teal-500 selection:text-white">
+
+  <!-- TOP BRANDING & GLOBAL ACTIONS BAR -->
+  <header class="bg-siftp-navy text-white sticky top-0 z-40 shadow-md">
+    <div class="px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 flex-wrap">
+      
+      <!-- Brand & Product -->
+      <div class="flex items-center space-x-3 rtl:space-x-reverse">
+        <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white focus:outline-none">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+        <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('dashboard')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-siftp-teal to-emerald-400 flex items-center justify-center text-white font-black text-xl shadow-inner shadow-teal-900/30">
+            <i class="fa-solid fa-paw"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold tracking-wider text-xl text-white">SIFTP</span>
+              <span class="text-[10px] tracking-widest uppercase bg-siftp-teal px-1.5 py-0.5 rounded font-bold text-white shadow-sm">VATERINARY</span>
+            </div>
+            <p class="text-[11px] text-teal-200 font-medium hidden sm:block">Hospital & Clinical Management System</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Context Info & Badge -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Demo Banner Tag -->
+        <div class="flex items-center bg-amber-500/20 border border-amber-400/40 text-amber-200 px-2.5 py-1 rounded-full text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span>
+          <span data-i18n="demoBadge">DEMO MODE (Fictional Data)</span>
+        </div>
+
+        <!-- Guided Tour Trigger -->
+        <button onclick="startGuidedDemo()" class="hidden md:flex items-center gap-1.5 bg-gradient-to-r from-teal-500 to-siftp-teal hover:from-teal-600 hover:to-teal-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition active:scale-95">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          <span data-i18n="quickTour">1-Click Guided Demo</span>
+        </button>
+
+        <!-- Role Selector -->
+        <div class="relative inline-block text-left">
+          <div class="flex items-center bg-white/10 border border-white/20 rounded-lg p-0.5 text-xs">
+            <span class="px-2 text-slate-300 hidden sm:inline" data-i18n="roleLabel">Role:</span>
+            <select id="userRoleSelect" onchange="changeUserRole(this.value)" class="bg-transparent text-white font-semibold py-1 px-2 focus:outline-none cursor-pointer">
+              <option value="admin" class="text-slate-900">Administrator</option>
+              <option value="reception" class="text-slate-900">Receptionist</option>
+              <option value="vet" class="text-slate-900">Veterinarian</option>
+              <option value="pharmacy" class="text-slate-900">Pharmacy Staff</option>
+              <option value="cashier" class="text-slate-900">Cashier / Billing</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Language Switcher (EN / Sindhi) -->
+        <button id="langToggleBtn" onclick="toggleLanguage()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg transition">
+          <i class="fa-solid fa-globe text-teal-300"></i>
+          <span id="currentLangLabel">سنڌي (Sindhi)</span>
+        </button>
+
+        <!-- Reset Seed Data Button -->
+        <button onclick="resetDemoData()" title="Reset Demo Data" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition text-xs">
+          <i class="fa-solid fa-arrow-rotate-right"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col justify-between transition-all duration-200 z-30 lg:static fixed inset-y-0 left-0 top-[53px] lg:top-0 -translate-x-full lg:translate-x-0 shadow-xl lg:shadow-none">
+      <div class="p-3 space-y-1 overflow-y-auto">
+        <div class="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400" data-i18n="navCategoryMain">Clinical Navigation</div>
+        
+        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition active:scale-98">
+          <i class="fa-solid fa-chart-pie w-5 text-center text-siftp-teal text-base"></i>
+          <span data-i18n="menuDashboard">Dashboard</span>
+        </button>
+
+        <button onclick="switchTab('kiosk')" data-tab="kiosk" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-tv w-5 text-center text-indigo-500 text-base"></i>
+          <span data-i18n="menuKiosk">Reception Kiosk & Token</span>
+        </button>
+
+        <button onclick="switchTab('registration')" data-tab="registration" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-address-card w-5 text-center text-blue-500 text-base"></i>
+          <span data-i18n="menuRegistration">Animal & Owner Registration</span>
+        </button>
+
+        <button onclick="switchTab('vetDashboard')" data-tab="vetDashboard" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-user-doctor w-5 text-center text-emerald-500 text-base"></i>
+          <span data-i18n="menuVetConsultation">Vet Consultation (EMR)</span>
+        </button>
+
+        <button onclick="switchTab('vaccination')" data-tab="vaccination" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-syringe w-5 text-center text-purple-500 text-base"></i>
+          <span data-i18n="menuVaccination">Vaccination Center</span>
+        </button>
+
+        <button onclick="switchTab('pharmacy')" data-tab="pharmacy" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-pills w-5 text-center text-amber-500 text-base"></i>
+          <span data-i18n="menuPharmacy">Pharmacy & Stock</span>
+        </button>
+
+        <button onclick="switchTab('billing')" data-tab="billing" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-cash-register w-5 text-center text-green-600 text-base"></i>
+          <span data-i18n="menuBilling">POS Billing & Cashier</span>
+        </button>
+
+        <button onclick="switchTab('kennels')" data-tab="kennels" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-hotel w-5 text-center text-cyan-600 text-base"></i>
+          <span data-i18n="menuKennels">Kennel & Admission</span>
+        </button>
+
+        <button onclick="switchTab('reports')" data-tab="reports" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition">
+          <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-rose-500 text-base"></i>
+          <span data-i18n="menuReports">Analytics & Reports</span>
+        </button>
+      </div>
+
+      <!-- Quick Stats Card in Sidebar -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50">
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-xs">
+          <div class="flex items-center justify-between text-slate-500 mb-1">
+            <span data-i18n="activeQueue">Active Token Queue</span>
+            <span id="sidebarQueueCount" class="font-bold text-siftp-teal">3 Waiting</span>
+          </div>
+          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+            <div id="queueProgressBar" class="bg-siftp-teal h-full w-2/5"></div>
+          </div>
+          <div class="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
+            <span id="currentRoleBadge">Role: Administrator</span>
+            <span class="text-emerald-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle text-[6px]"></i> Live</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT BODY -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-siftp-light relative">
+
+      <!-- ============================================== -->
+      <!-- SCREEN 1: DASHBOARD                            -->
+      <!-- ============================================== -->
+      <section id="tab-dashboard" class="space-y-6 fade-enter">
+        <!-- Banner & Quick Action Launchers -->
+        <div class="bg-gradient-to-r from-siftp-navy via-slate-800 to-siftp-teal text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+          <div class="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none flex items-center pr-6">
+            <i class="fa-solid fa-heart-pulse text-9xl"></i>
+          </div>
+          <div class="relative z-10 max-w-3xl">
+            <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-xs font-semibold mb-2">
+              <i class="fa-solid fa-shield-cat text-teal-300"></i>
+              <span>SIFTP Vaternity Management Cloud</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight" data-i18n="dashGreeting">Welcome to SIFTP Vaternity Hospital</h1>
+            <p class="text-slate-200 text-sm mt-1 mb-4" data-i18n="dashSubtitle">Next-generation clinical workflow, veterinary diagnostics, inpatient boarding, and touch-POS billing for animal health centers.</p>
+            
+            <!-- Big Touch Quick Action Buttons -->
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button onclick="openRegisterModal()" class="bg-siftp-teal hover:bg-teal-600 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-paw"></i>
+                <span data-i18n="btnRegisterAnimal">Register Animal</span>
+              </button>
+              <button onclick="openTokenModal()" class="bg-white/20 hover:bg-white/30 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl backdrop-blur transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-ticket"></i>
+                <span data-i18n="btnGenerateToken">Issue Queue Token</span>
+              </button>
+              <button onclick="switchTab('vetDashboard')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span data-i18n="btnConsultationRoom">Consultation Queue</span>
+              </button>
+              <button onclick="switchTab('billing')" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <span data-i18n="btnPosBilling">POS Billing</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 PRIMARY SUMMARY KPI METRIC CARDS -->
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiRegistered">Registered Animals</p>
+              <h3 id="kpi-total-animals" class="text-2xl font-black text-slate-800 mt-1">128</h3>
+              <p class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fa-solid fa-arrow-trend-up"></i> +8 today</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-dog"></i>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiWaiting">Waiting in Queue</p>
+              <h3 id="kpi-waiting-queue" class="text-2xl font-black text-siftp-teal mt-1">4</h3>
+              <p class="text-[11px] text-slate-400 mt-1" data-i18n="kpiAvgWait">Avg wait: 12 min</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-teal-50 text-siftp-teal flex items-center justify-center text-xl">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiConsultations">Today Consultations</p>
+              <h3 id="kpi-completed-consults" class="text-2xl font-black text-slate-800 mt-1">16</h3>
+              <p class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fa-solid fa-check-circle"></i> 12 completed</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-notes-medical"></i>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiVaccineDue">Vaccines Due</p>
+              <h3 id="kpi-vaccines-due" class="text-2xl font-black text-purple-600 mt-1">9</h3>
+              <p class="text-[11px] text-rose-500 font-semibold mt-1">3 Overdue</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-shield-virus"></i>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiKennels">Admitted Inpatients</p>
+              <h3 id="kpi-admitted" class="text-2xl font-black text-indigo-600 mt-1">5 / 12</h3>
+              <p class="text-[11px] text-indigo-500 font-medium mt-1">7 Kennels Free</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-bed"></i>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiRevenue">Today's Revenue</p>
+              <h3 id="kpi-revenue" class="text-2xl font-black text-green-700 mt-1">₨ 48,500</h3>
+              <p class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fa-solid fa-circle-check"></i> 100% Collected</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+          </div>
+
+          <!-- Card 7 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiLowStock">Low Stock Medicines</p>
+              <h3 id="kpi-low-stock" class="text-2xl font-black text-amber-600 mt-1">3</h3>
+              <p class="text-[11px] text-amber-600 font-medium mt-1">Reorder Required</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+          </div>
+
+          <!-- Card 8 -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide" data-i18n="kpiAppointments">Appointments Booked</p>
+              <h3 id="kpi-appointments" class="text-2xl font-black text-slate-800 mt-1">11</h3>
+              <p class="text-[11px] text-slate-500 mt-1">4 remaining today</p>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- TWO COLUMN DASHBOARD: LIVE PATIENT QUEUE & TODAY'S PERFORMANCE -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Live Patient Queue Column (2 spans) -->
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-siftp-teal animate-ping"></span>
+                  <span data-i18n="liveQueueTitle">Live Patient Waiting Queue</span>
+                </h2>
+                <p class="text-xs text-slate-500" data-i18n="liveQueueSubtitle">Real-time status of checked-in animals awaiting veterinary consultation</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="openTokenModal()" class="text-xs bg-siftp-teal/10 hover:bg-siftp-teal/20 text-siftp-teal font-semibold px-3 py-1.5 rounded-lg transition">
+                  <i class="fa-solid fa-plus mr-1"></i> <span data-i18n="addToken">Add Token</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Queue Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+                  <tr>
+                    <th class="py-2.5 px-3" data-i18n="colToken">Token</th>
+                    <th class="py-2.5 px-3" data-i18n="colPatient">Animal & ID</th>
+                    <th class="py-2.5 px-3" data-i18n="colSpecies">Species</th>
+                    <th class="py-2.5 px-3" data-i18n="colOwner">Owner</th>
+                    <th class="py-2.5 px-3" data-i18n="colDoctor">Assigned Vet</th>
+                    <th class="py-2.5 px-3" data-i18n="colStatus">Status</th>
+                    <th class="py-2.5 px-3 text-right" data-i18n="colAction">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardQueueTableBody" class="divide-y divide-slate-100">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Revenue & Department Workload Column (1 span) -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h2 class="text-base font-bold text-slate-800" data-i18n="revenueChartTitle">Today's Revenue Breakdown</h2>
+                <span class="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded">PKR Currency</span>
+              </div>
+              <p class="text-xs text-slate-400 mb-4" data-i18n="revenueChartSub">Consultation, Surgery, Pharmacy & Boarding</p>
+
+              <!-- Simulated CSS/SVG Bar Graph -->
+              <div class="space-y-3 text-xs font-medium">
+                <div>
+                  <div class="flex justify-between text-slate-600 mb-1">
+                    <span>Pharmacy & Injections</span>
+                    <span class="font-bold text-slate-800">₨ 24,000 (49%)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-amber-500 h-full rounded-full" style="width: 49%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-slate-600 mb-1">
+                    <span>Vet Consultations</span>
+                    <span class="font-bold text-slate-800">₨ 13,500 (28%)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-siftp-teal h-full rounded-full" style="width: 28%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-slate-600 mb-1">
+                    <span>Vaccination Protocols</span>
+                    <span class="font-bold text-slate-800">₨ 6,500 (13%)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-purple-500 h-full rounded-full" style="width: 13%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-slate-600 mb-1">
+                    <span>Kennel Boarding & Surgery</span>
+                    <span class="font-bold text-slate-800">₨ 4,500 (10%)</span>
+                  </div>
+                  <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-indigo-500 h-full rounded-full" style="width: 10%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Doctor on Duty Roster -->
+            <div class="mt-6 pt-4 border-t border-slate-100">
+              <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2" data-i18n="vetsOnDuty">Veterinarians on Duty</p>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-[10px]">DF</div>
+                    <div>
+                      <p class="font-semibold text-slate-800">Dr. Fahad Khan (DVM)</p>
+                      <p class="text-[10px] text-slate-400">Surgery & Small Animal</p>
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold">In Clinic</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-teal-100 text-teal-700 font-bold flex items-center justify-center text-[10px]">DA</div>
+                    <div>
+                      <p class="font-semibold text-slate-800">Dr. Ayesha Baloch (MPhil)</p>
+                      <p class="text-[10px] text-slate-400">Livestock & Bovine</p>
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold">In Clinic</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 2: RECEPTION KIOSK & TOKEN SYSTEM       -->
+      <!-- ============================================== -->
+      <section id="tab-kiosk" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="kioskHeading">Reception Touch-Kiosk & Queue Management</h1>
+            <p class="text-xs text-slate-500" data-i18n="kioskSubtitle">Rapid one-touch check-in, token dispenser, and live TV waiting display</p>
+          </div>
+          <button onclick="openTokenModal()" class="bg-siftp-teal hover:bg-teal-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span data-i18n="btnNewToken">Issue Next Token</span>
+          </button>
+        </div>
+
+        <!-- POS / KIOSK LARGE ACTION TILES -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div onclick="openRegisterModal()" class="cursor-pointer bg-white border-2 border-slate-200 hover:border-siftp-teal rounded-2xl p-5 shadow-sm transition hover:shadow-md active:scale-95 text-center group">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-teal-50 group-hover:bg-siftp-teal text-siftp-teal group-hover:text-white flex items-center justify-center text-2xl transition">
+              <i class="fa-solid fa-paw"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm group-hover:text-siftp-teal" data-i18n="kioskTile1">New Animal Register</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Add owner, species & auto ID</p>
+          </div>
+
+          <div onclick="openTokenModal()" class="cursor-pointer bg-white border-2 border-slate-200 hover:border-indigo-500 rounded-2xl p-5 shadow-sm transition hover:shadow-md active:scale-95 text-center group">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white flex items-center justify-center text-2xl transition">
+              <i class="fa-solid fa-ticket"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm group-hover:text-indigo-600" data-i18n="kioskTile2">Quick Check-in</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Assign vet & issue queue slip</p>
+          </div>
+
+          <div onclick="switchTab('registration')" class="cursor-pointer bg-white border-2 border-slate-200 hover:border-blue-500 rounded-2xl p-5 shadow-sm transition hover:shadow-md active:scale-95 text-center group">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center text-2xl transition">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm group-hover:text-blue-600" data-i18n="kioskTile3">Patient Search</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Lookup microchip, phone or ID</p>
+          </div>
+
+          <div onclick="switchTab('billing')" class="cursor-pointer bg-white border-2 border-slate-200 hover:border-green-500 rounded-2xl p-5 shadow-sm transition hover:shadow-md active:scale-95 text-center group">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-green-50 group-hover:bg-green-600 text-green-600 group-hover:text-white flex items-center justify-center text-2xl transition">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm group-hover:text-green-600" data-i18n="kioskTile4">Cashier Billing</h3>
+            <p class="text-[11px] text-slate-400 mt-1">POS receipt & split payment</p>
+          </div>
+        </div>
+
+        <!-- LIVE TOKEN BOARD (Simulating Waiting Room TV) -->
+        <div class="bg-siftp-navy text-white rounded-2xl p-6 shadow-lg border border-slate-700">
+          <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
+              <h2 class="text-lg font-bold tracking-wider uppercase text-teal-300" data-i18n="tvBoardTitle">Waiting Area Display Screen</h2>
+            </div>
+            <div class="text-xs text-slate-300 font-mono" id="liveClockDisplay">12:30 PM</div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="kioskTokenCardsGrid">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 3: OWNER & ANIMAL REGISTRATION          -->
+      <!-- ============================================== -->
+      <section id="tab-registration" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="regTitle">Animal & Owner Registration</h1>
+            <p class="text-xs text-slate-500" data-i18n="regSubtitle">Register companion pets, large livestock, buffaloes, and working animals</p>
+          </div>
+          <button onclick="openRegisterModal()" class="bg-siftp-teal hover:bg-teal-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+            <i class="fa-solid fa-plus"></i>
+            <span data-i18n="btnRegisterNewAnimal">Register New Animal</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-3 items-center justify-between">
+          <div class="flex-1 min-w-[240px] relative">
+            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
+            <input type="text" id="patientSearchInput" onkeyup="filterPatientTable()" placeholder="Search patient ID, animal name, breed, or owner mobile..." class="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-siftp-teal">
+          </div>
+
+          <!-- Species filter buttons -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+            <button onclick="filterSpecies('all')" class="species-filter-btn px-3 py-1.5 rounded-lg bg-siftp-navy text-white font-medium">All</button>
+            <button onclick="filterSpecies('Dog')" class="species-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Dogs</button>
+            <button onclick="filterSpecies('Cat')" class="species-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Cats</button>
+            <button onclick="filterSpecies('Cattle')" class="species-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Cattle</button>
+            <button onclick="filterSpecies('Buffalo')" class="species-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Buffalo</button>
+            <button onclick="filterSpecies('Goat')" class="species-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Goat</button>
+            <button onclick="filterSpecies('Horse')" class="species-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Horse</button>
+          </div>
+        </div>
+
+        <!-- Patient Cards Grid -->
+        <div id="patientCardsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- Injected via JavaScript -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 4: VETERINARIAN DASHBOARD & EMR         -->
+      <!-- ============================================== -->
+      <section id="tab-vetDashboard" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="vetTitle">Veterinarian Consultation Room (EMR)</h1>
+            <p class="text-xs text-slate-500" data-i18n="vetSubtitle">Clinical examination, vitals, diagnosis, treatment plans, and Rx e-prescribing</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-slate-500">Attending Doctor:</span>
+            <span class="text-xs font-bold text-siftp-navy bg-white border border-slate-300 px-3 py-1 rounded-lg">Dr. Fahad Khan (DVM)</span>
+          </div>
+        </div>
+
+        <!-- Waiting Patients Cards -->
+        <div>
+          <h2 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-stethoscope text-siftp-teal"></i>
+            <span data-i18n="vetQueueHeading">Active Waiting Consultation Queue</span>
+          </h2>
+          <div id="vetQueueGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Completed Consultations History Today -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <h2 class="text-sm font-bold text-slate-800 mb-3" data-i18n="consultHistoryHeading">Recent Consultations & Clinical Notes History</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3">Date/Time</th>
+                  <th class="py-2.5 px-3">Patient ID</th>
+                  <th class="py-2.5 px-3">Animal Name</th>
+                  <th class="py-2.5 px-3">Species</th>
+                  <th class="py-2.5 px-3">Diagnosis</th>
+                  <th class="py-2.5 px-3">Prescription</th>
+                  <th class="py-2.5 px-3">Doctor</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="consultationHistoryTableBody" class="divide-y divide-slate-100">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 5: VACCINATION TRACKER                  -->
+      <!-- ============================================== -->
+      <section id="tab-vaccination" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="vacTitle">Vaccination Protocol & Immunity Tracker</h1>
+            <p class="text-xs text-slate-500" data-i18n="vacSubtitle">Rabies, DHPP, FMD (Foot & Mouth), HS, Enterotoxaemia schedules</p>
+          </div>
+          <button onclick="openVaccineModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+            <i class="fa-solid fa-syringe"></i>
+            <span data-i18n="btnRecordVaccine">Record Vaccine Dose</span>
+          </button>
+        </div>
+
+        <!-- Vaccine Status Tiles -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-medium">Completed This Month</p>
+              <h3 class="text-xl font-black text-slate-800">42 Doses</h3>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-medium">Due in Next 7 Days</p>
+              <h3 class="text-xl font-black text-amber-600">9 Animals</h3>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-medium">Overdue Reminders</p>
+              <h3 class="text-xl font-black text-rose-600">3 Alerts</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vaccination Schedule Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-bold text-slate-800">Vaccination Immunization Registry</h2>
+            <div class="flex gap-2">
+              <button class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium" onclick="filterVaccines('all')">All</button>
+              <button class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium" onclick="filterVaccines('due')">Upcoming Due</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3">Patient ID</th>
+                  <th class="py-2.5 px-3">Animal & Species</th>
+                  <th class="py-2.5 px-3">Owner Contact</th>
+                  <th class="py-2.5 px-3">Vaccine Name</th>
+                  <th class="py-2.5 px-3">Batch #</th>
+                  <th class="py-2.5 px-3">Admin Date</th>
+                  <th class="py-2.5 px-3">Next Due Date</th>
+                  <th class="py-2.5 px-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="vaccineTableBody" class="divide-y divide-slate-100">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 6: PHARMACY & INVENTORY                 -->
+      <!-- ============================================== -->
+      <section id="tab-pharmacy" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="pharmTitle">Pharmacy & Medicine Stock</h1>
+            <p class="text-xs text-slate-500" data-i18n="pharmSubtitle">Veterinary antibiotics, anthelmintics, vaccines, and surgical supplies</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="openDispenseModal()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+              <i class="fa-solid fa-hand-holding-medical"></i>
+              <span data-i18n="btnDispense">Dispense Rx</span>
+            </button>
+            <button onclick="openAddMedicineModal()" class="bg-siftp-teal hover:bg-teal-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+              <i class="fa-solid fa-plus"></i>
+              <span data-i18n="btnAddItem">Add Inventory</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pharmacy Inventory Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 class="text-sm font-bold text-slate-800">Current Stock Levels & Pricing</h2>
+            <div class="relative w-72">
+              <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input type="text" id="pharmacySearchInput" onkeyup="filterPharmacyTable()" placeholder="Search medicine or batch..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-siftp-teal">
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3">Item Name</th>
+                  <th class="py-2.5 px-3">Category</th>
+                  <th class="py-2.5 px-3">Batch #</th>
+                  <th class="py-2.5 px-3">Expiry Date</th>
+                  <th class="py-2.5 px-3">Stock Units</th>
+                  <th class="py-2.5 px-3">Purchase Price</th>
+                  <th class="py-2.5 px-3">Retail Price</th>
+                  <th class="py-2.5 px-3">Status</th>
+                  <th class="py-2.5 px-3 text-right">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="pharmacyTableBody" class="divide-y divide-slate-100">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 7: POS BILLING & CASHIER                -->
+      <!-- ============================================== -->
+      <section id="tab-billing" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="posTitle">Touch POS Billing & Cashier Desk</h1>
+            <p class="text-xs text-slate-500" data-i18n="posSubtitle">Rapid service entry, automatic itemized calculation, partial payment & tax invoice receipt</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-slate-500">Invoice Ref:</span>
+            <span id="currentInvoiceNumber" class="text-xs font-mono font-bold text-siftp-navy bg-white border border-slate-300 px-3 py-1 rounded-lg">INV-2026-042</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- POS ITEM SELECTION (7 COLS) -->
+          <div class="lg:col-span-7 space-y-4">
+            
+            <!-- Patient Selector Card -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" data-i18n="billToPatient">Select Patient for Invoice</label>
+              <select id="billingPatientSelect" onchange="onSelectBillingPatient(this.value)" class="w-full text-xs border border-slate-200 rounded-xl p-2.5 bg-slate-50 focus:outline-none focus:border-siftp-teal font-medium">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <!-- Service Category Quick Tap Tiles -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-3" data-i18n="quickItemsTitle">Quick-Tap Clinical Services & Products</h3>
+              
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <button onclick="addPosItem('General OPD Consultation', 1000, 'Clinical')" class="p-3 rounded-xl border border-teal-200 bg-teal-50/50 hover:bg-teal-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-siftp-navy">OPD Consultation</div>
+                  <div class="text-[11px] text-siftp-teal font-semibold mt-1">₨ 1,000</div>
+                </button>
+
+                <button onclick="addPosItem('Rabies Vaccine (Annual)', 1500, 'Vaccine')" class="p-3 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-purple-900">Rabies Vaccine</div>
+                  <div class="text-[11px] text-purple-600 font-semibold mt-1">₨ 1,500</div>
+                </button>
+
+                <button onclick="addPosItem('Canine DHPP 5-in-1', 2200, 'Vaccine')" class="p-3 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-purple-900">DHPP 5-in-1</div>
+                  <div class="text-[11px] text-purple-600 font-semibold mt-1">₨ 2,200</div>
+                </button>
+
+                <button onclick="addPosItem('Complete Blood Count (CBC)', 1800, 'Laboratory')" class="p-3 rounded-xl border border-blue-200 bg-blue-50/50 hover:bg-blue-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-blue-900">CBC Blood Test</div>
+                  <div class="text-[11px] text-blue-600 font-semibold mt-1">₨ 1,800</div>
+                </button>
+
+                <button onclick="addPosItem('Wound Dressing & Suturing', 2500, 'Surgery')" class="p-3 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-rose-900">Wound Dressing</div>
+                  <div class="text-[11px] text-rose-600 font-semibold mt-1">₨ 2,500</div>
+                </button>
+
+                <button onclick="addPosItem('Kennel Boarding (Per Day)', 2000, 'Inpatient')" class="p-3 rounded-xl border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-indigo-900">Kennel Boarding</div>
+                  <div class="text-[11px] text-indigo-600 font-semibold mt-1">₨ 2,000 / day</div>
+                </button>
+
+                <button onclick="addPosItem('Oxytetracycline Injection', 450, 'Pharmacy')" class="p-3 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-amber-900">Oxytetracycline</div>
+                  <div class="text-[11px] text-amber-600 font-semibold mt-1">₨ 450</div>
+                </button>
+
+                <button onclick="addPosItem('Ivermectin Deworming', 600, 'Pharmacy')" class="p-3 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-amber-900">Ivermectin 10ml</div>
+                  <div class="text-[11px] text-amber-600 font-semibold mt-1">₨ 600</div>
+                </button>
+
+                <button onclick="addPosItem('Emergency Ultrasound Scan', 3500, 'Imaging')" class="p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100 text-left transition active:scale-95">
+                  <div class="text-xs font-bold text-emerald-900">Ultrasound Scan</div>
+                  <div class="text-[11px] text-emerald-600 font-semibold mt-1">₨ 3,500</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom Custom Line Item Addition -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-2">
+              <input type="text" id="customItemName" placeholder="Add custom service or item..." class="flex-1 text-xs border border-slate-200 rounded-lg p-2 focus:outline-none">
+              <input type="number" id="customItemPrice" placeholder="Price (PKR)" class="w-28 text-xs border border-slate-200 rounded-lg p-2 focus:outline-none">
+              <button onclick="addCustomLineItem()" class="bg-slate-800 text-white text-xs px-3 py-2 rounded-lg font-semibold hover:bg-slate-700">Add Item</button>
+            </div>
+          </div>
+
+          <!-- POS CART & CHECKOUT (5 COLS) -->
+          <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                <h3 class="font-bold text-sm text-slate-800" data-i18n="cartTitle">Invoice Breakdown</h3>
+                <button onclick="clearPosCart()" class="text-xs text-rose-500 hover:text-rose-700 font-semibold" data-i18n="clearCart">Clear All</button>
+              </div>
+
+              <!-- Cart Line Items List -->
+              <div id="posCartItemsList" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
+                <!-- Dynamically filled -->
+              </div>
+            </div>
+
+            <!-- Billing Calculations -->
+            <div class="mt-6 pt-4 border-t border-slate-200 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-600">
+                <span data-i18n="subtotal">Subtotal</span>
+                <span id="posSubtotal" class="font-bold text-slate-800">₨ 0</span>
+              </div>
+
+              <div class="flex items-center justify-between text-slate-600">
+                <span data-i18n="discount">Discount (PKR)</span>
+                <input type="number" id="posDiscountInput" value="0" min="0" oninput="calculatePosTotals()" class="w-24 text-right border border-slate-200 rounded p-1 text-xs font-bold text-slate-700">
+              </div>
+
+              <div class="flex justify-between text-base font-extrabold text-siftp-navy pt-2 border-t border-slate-100">
+                <span data-i18n="netPayable">Net Payable</span>
+                <span id="posNetTotal" class="text-siftp-teal">₨ 0</span>
+              </div>
+
+              <!-- Payment Method & Amount Paid -->
+              <div class="pt-2 grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 uppercase">Payment Mode</label>
+                  <select id="posPaymentMode" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 bg-slate-50 font-medium">
+                    <option value="Cash">Cash Currency</option>
+                    <option value="Card">Credit / Debit Card</option>
+                    <option value="Online">JazzCash / EasyPaisa</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 uppercase">Paid Now (PKR)</label>
+                  <input type="number" id="posPaidAmount" oninput="calculateBalance()" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 font-bold text-slate-800" placeholder="Amount">
+                </div>
+              </div>
+
+              <div class="flex justify-between text-xs font-semibold text-slate-500 pt-1">
+                <span>Remaining Balance:</span>
+                <span id="posRemainingBalance" class="text-rose-600 font-bold">₨ 0</span>
+              </div>
+
+              <!-- Checkout Actions -->
+              <div class="pt-3 flex gap-2">
+                <button onclick="processCheckout(true)" class="flex-1 bg-siftp-teal hover:bg-teal-600 text-white font-bold py-2.5 rounded-xl shadow transition text-xs flex items-center justify-center gap-1.5 active:scale-95">
+                  <i class="fa-solid fa-print"></i>
+                  <span data-i18n="payAndPrint">Pay & Print Receipt</span>
+                </button>
+                <button onclick="processCheckout(false)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-3 rounded-xl transition text-xs">
+                  <span data-i18n="saveOnly">Save Only</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 8: INPATIENT KENNEL MANAGEMENT          -->
+      <!-- ============================================== -->
+      <section id="tab-kennels" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="kennelTitle">Kennel, Ward & Admission Management</h1>
+            <p class="text-xs text-slate-500" data-i18n="kennelSubtitle">Small animal cages, feline suites, large livestock pens, and isolation quarantine</p>
+          </div>
+          <button onclick="openAdmitModal()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 active:scale-95">
+            <i class="fa-solid fa-plus-circle"></i>
+            <span data-i18n="btnAdmitAnimal">Admit Patient to Kennel</span>
+          </button>
+        </div>
+
+        <!-- Kennel Capacity Grid -->
+        <div id="kennelsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          <!-- Injected dynamically via JS -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SCREEN 9: ANALYTICS & REPORTS                 -->
+      <!-- ============================================== -->
+      <section id="tab-reports" class="hidden space-y-6 fade-enter">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800" data-i18n="repTitle">Hospital Analytics & Exportable Reports</h1>
+            <p class="text-xs text-slate-500" data-i18n="repSubtitle">Financial audits, clinical case load, species distribution & pharmacy inventory status</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="exportReportsToCSV('consultations')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-csv text-sm"></i>
+              <span>Export Consultations CSV</span>
+            </button>
+            <button onclick="exportReportsToCSV('revenue')" class="bg-siftp-navy hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel text-sm"></i>
+              <span>Export Invoices CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center">
+          <div class="flex items-center gap-2 text-xs">
+            <label class="font-bold text-slate-600">Date Range:</label>
+            <select id="reportDateRange" class="border border-slate-200 rounded-lg p-1.5 text-xs focus:outline-none">
+              <option value="today">Today (22 Oct 2026)</option>
+              <option value="week">Past 7 Days</option>
+              <option value="month">Current Month</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <label class="font-bold text-slate-600">Doctor Filter:</label>
+            <select id="reportDoctorFilter" class="border border-slate-200 rounded-lg p-1.5 text-xs focus:outline-none">
+              <option value="all">All Doctors</option>
+              <option value="Dr. Fahad Khan">Dr. Fahad Khan</option>
+              <option value="Dr. Ayesha Baloch">Dr. Ayesha Baloch</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Species Distribution Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 class="font-bold text-sm text-slate-800 mb-3" data-i18n="speciesBreakdown">Patient Case Load by Species</h3>
+            <div id="speciesReportBars" class="space-y-2.5 text-xs">
+              <!-- Dynamically rendered bars -->
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 class="font-bold text-sm text-slate-800 mb-3" data-i18n="revenueSummary">Financial Realization Summary</h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between p-2.5 bg-slate-50 rounded-xl">
+                <span class="text-slate-600">Total Billed Invoices</span>
+                <span class="font-bold text-slate-900" id="repTotalBilled">₨ 68,500</span>
+              </div>
+              <div class="flex justify-between p-2.5 bg-emerald-50 rounded-xl text-emerald-800">
+                <span>Total Cash & Electronic Received</span>
+                <span class="font-bold" id="repTotalReceived">₨ 64,500</span>
+              </div>
+              <div class="flex justify-between p-2.5 bg-rose-50 rounded-xl text-rose-800">
+                <span>Outstanding Customer Balances</span>
+                <span class="font-bold" id="repOutstanding">₨ 4,000</span>
+              </div>
+              <div class="flex justify-between p-2.5 bg-blue-50 rounded-xl text-blue-800">
+                <span>Vaccines Administered This Period</span>
+                <span class="font-bold">24 Doses</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS & OVERLAYS                              -->
+  <!-- ============================================== -->
+
+  <!-- MODAL 1: REGISTER OWNER & ANIMAL -->
+  <div id="registerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModal('registerModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-teal-100 text-siftp-teal flex items-center justify-center text-lg">
+          <i class="fa-solid fa-paw"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-slate-800" data-i18n="regModalTitle">Register New Animal & Owner</h2>
+          <p class="text-xs text-slate-500">Auto-generates clinical patient ID and medical records file</p>
+        </div>
+      </div>
+
+      <form id="registerAnimalForm" onsubmit="handleSaveAnimal(event)" class="space-y-4 text-xs">
+        <!-- Generated ID Preview -->
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex justify-between items-center">
+          <span class="font-bold text-slate-600">Auto Patient ID:</span>
+          <span id="nextPatientIdDisplay" class="font-mono font-bold text-siftp-teal text-sm">ANI-1005</span>
+        </div>
+
+        <!-- Owner Details Section -->
+        <div>
+          <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-2 border-b pb-1">Owner Contact Information</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Owner Full Name *</label>
+              <input type="text" id="regOwnerName" required placeholder="e.g. Ahmed Ali" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Mobile Number (WhatsApp) *</label>
+              <input type="tel" id="regOwnerPhone" required placeholder="0300-1234567" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-semibold text-slate-600 mb-1">Address / Farm Location</label>
+              <input type="text" id="regOwnerAddress" placeholder="e.g. Malir Dairy Colony, Karachi / Hyderabad" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Animal Details Section -->
+        <div>
+          <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-2 border-b pb-1">Animal Patient Information</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Animal Name *</label>
+              <input type="text" id="regAnimalName" required placeholder="e.g. Sheru, Moti, Sultan" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Species *</label>
+              <select id="regSpecies" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none font-medium">
+                <option value="Dog">Dog</option>
+                <option value="Cat">Cat</option>
+                <option value="Cattle">Cattle (Cow/Bull)</option>
+                <option value="Buffalo">Buffalo (Nili-Ravi/Kundi)</option>
+                <option value="Goat">Goat (Kamori/Beetal)</option>
+                <option value="Sheep">Sheep</option>
+                <option value="Horse">Horse</option>
+                <option value="Camel">Camel</option>
+                <option value="Bird">Bird / Falcon</option>
+                <option value="Other">Other Species</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Breed</label>
+              <input type="text" id="regBreed" placeholder="e.g. German Shepherd, Sahiwal" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Sex</label>
+              <select id="regSex" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Neutered Male">Neutered / Castrated</option>
+                <option value="Spayed Female">Spayed Female</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Age</label>
+              <input type="text" id="regAge" placeholder="e.g. 2.5 Years" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Weight (kg)</label>
+              <input type="number" step="0.1" id="regWeight" placeholder="e.g. 24.5" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block font-semibold text-slate-600 mb-1">Known Drug Allergies / Clinical Cautions</label>
+              <input type="text" id="regAllergies" placeholder="e.g. Penicillin allergy, aggressive temperament, none" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('registerModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-siftp-teal hover:bg-teal-600 text-white font-bold rounded-xl shadow">Save & Generate ID</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ISSUE TOKEN / CHECK-IN -->
+  <div id="tokenModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeModal('tokenModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-ticket"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-800" data-i18n="tokenModalTitle">Issue Clinical Queue Token</h2>
+          <p class="text-xs text-slate-500">Route patient to consultation room or treatment area</p>
+        </div>
+      </div>
+
+      <form id="issueTokenForm" onsubmit="handleIssueToken(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Select Animal Patient *</label>
+          <select id="tokenPatientSelect" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Service / Department *</label>
+          <select id="tokenDepartment" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none font-medium">
+            <option value="General OPD">General OPD Consultation</option>
+            <option value="Vaccination">Vaccination & Deworming</option>
+            <option value="Emergency & Trauma">Emergency & Trauma Care</option>
+            <option value="Surgery Pre-Op">Surgery Pre-Op Evaluation</option>
+            <option value="Kennel Boarding">Inpatient Kennel Admission</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Assign Veterinarian *</label>
+          <select id="tokenDoctor" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+            <option value="Dr. Fahad Khan">Dr. Fahad Khan (Surgery & Small Animal)</option>
+            <option value="Dr. Ayesha Baloch">Dr. Ayesha Baloch (Livestock & Bovine)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Visit Reason / Chief Complaint</label>
+          <input type="text" id="tokenReason" placeholder="e.g. High fever, anorexia, limp, vaccination" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('tokenModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow">Generate Token</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: FULL VETERINARY CONSULTATION (SOAP NOTES & PRESCRIPTION) -->
+  <div id="consultationModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+      <button onclick="closeModal('consultationModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+        <div class="w-11 h-11 rounded-2xl bg-teal-100 text-siftp-teal flex items-center justify-center text-xl">
+          <i class="fa-solid fa-notes-medical"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base sm:text-lg font-bold text-slate-800" data-i18n="consultModalTitle">Clinical Consultation & EMR</h2>
+            <span id="consultTokenTag" class="bg-teal-100 text-siftp-teal text-xs font-mono font-bold px-2 py-0.5 rounded">T-101</span>
+          </div>
+          <p id="consultPatientSummary" class="text-xs text-slate-500 font-medium">ANI-1001 — Sheru (Dog / German Shepherd) — Owner: Ahmed Ali</p>
+        </div>
+      </div>
+
+      <form id="consultationForm" onsubmit="handleSaveConsultation(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="consultPatientId">
+        <input type="hidden" id="consultTokenId">
+
+        <!-- Physical Vitals Quadrant -->
+        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-2 text-siftp-navy flex items-center gap-1.5">
+            <i class="fa-solid fa-heart-pulse text-rose-500"></i>
+            <span>Vital Signs & Triage</span>
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-slate-500 mb-0.5">Temperature (°F)</label>
+              <input type="number" step="0.1" id="consultTemp" placeholder="101.5" class="w-full bg-white border border-slate-200 rounded-lg p-2 font-bold focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-500 mb-0.5">Weight (kg)</label>
+              <input type="number" step="0.1" id="consultWeight" placeholder="24.0" class="w-full bg-white border border-slate-200 rounded-lg p-2 font-bold focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-500 mb-0.5">Heart Rate (bpm)</label>
+              <input type="number" id="consultHeartRate" placeholder="95" class="w-full bg-white border border-slate-200 rounded-lg p-2 font-bold focus:border-siftp-teal focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-slate-500 mb-0.5">Resp Rate (/min)</label>
+              <input type="number" id="consultRespRate" placeholder="22" class="w-full bg-white border border-slate-200 rounded-lg p-2 font-bold focus:border-siftp-teal focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Clinical Notes SOAP -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Chief Complaint & History</label>
+            <textarea id="consultComplaint" rows="2" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none" placeholder="e.g. Not eating for 2 days, lethargic, vomiting after drinking water"></textarea>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Physical Examination Findings</label>
+            <textarea id="consultExam" rows="2" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none" placeholder="e.g. Mild dehydration (5%), abdominal palpation indicates slight discomfort"></textarea>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Clinical Diagnosis *</label>
+            <input type="text" id="consultDiagnosis" required placeholder="e.g. Acute Gastroenteritis / Tick Fever" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none font-semibold text-slate-800">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Follow-Up Date</label>
+            <input type="date" id="consultFollowUp" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-siftp-teal focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Electronic Rx Prescription Generator -->
+        <div class="border border-slate-200 rounded-2xl p-4 bg-teal-50/20">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+              <i class="fa-solid fa-prescription text-siftp-teal text-sm"></i>
+              <span>Prescribe Medicines (Auto-linked to Pharmacy & Billing)</span>
+            </h4>
+            <button type="button" onclick="addRxItemRow()" class="text-xs bg-siftp-teal text-white px-2.5 py-1 rounded-lg font-semibold hover:bg-teal-600 transition">
+              <i class="fa-solid fa-plus mr-1"></i> Add Medicine
+            </button>
+          </div>
+
+          <div id="rxItemsContainer" class="space-y-2">
+            <!-- Row will be added dynamically -->
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('consultationModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Discard</button>
+          <button type="submit" class="px-5 py-2 bg-siftp-teal hover:bg-teal-600 text-white font-bold rounded-xl shadow">Save Consultation & Complete Visit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: RECORD VACCINATION -->
+  <div id="vaccineModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeModal('vaccineModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-syringe"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-800">Record Vaccine Dose</h2>
+          <p class="text-xs text-slate-500">Creates booster recall and updates animal health passport</p>
+        </div>
+      </div>
+
+      <form id="recordVaccineForm" onsubmit="handleSaveVaccine(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Select Patient *</label>
+          <select id="vacPatientSelect" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-purple-600 focus:outline-none">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Vaccine Name *</label>
+          <select id="vacName" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-purple-600 focus:outline-none font-medium">
+            <option value="Rabies Monovalent (Inactivated)">Rabies Monovalent (Inactivated)</option>
+            <option value="Canine DHPP 5-in-1">Canine DHPP 5-in-1</option>
+            <option value="FMD Oil Adjuvanted (Foot & Mouth)">FMD (Bovine Foot & Mouth)</option>
+            <option value="HS Vaccine (Haemorrhagic Septicaemia)">HS Vaccine (Haemorrhagic Septicaemia)</option>
+            <option value="Enterotoxaemia + Tetanus">Enterotoxaemia + Tetanus (Sheep/Goat)</option>
+            <option value="Feline Tricat Trio">Feline Tricat Trio</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Batch Number</label>
+            <input type="text" id="vacBatch" value="B-2026-X9" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-purple-600 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Admin Date</label>
+            <input type="date" id="vacAdminDate" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-purple-600 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Next Due Booster Date *</label>
+            <input type="date" id="vacDueDate" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-purple-600 focus:outline-none font-bold text-purple-700">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Administering Vet</label>
+            <select id="vacVet" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-purple-600 focus:outline-none">
+              <option value="Dr. Fahad Khan">Dr. Fahad Khan</option>
+              <option value="Dr. Ayesha Baloch">Dr. Ayesha Baloch</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('vaccineModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow">Save Vaccination</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 5: DISPENSE PHARMACY -->
+  <div id="dispenseModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeModal('dispenseModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-pills"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-800">Dispense Medicine</h2>
+          <p class="text-xs text-slate-500">Deducts physical clinic stock and pushes to cashier invoice</p>
+        </div>
+      </div>
+
+      <form id="dispenseMedicineForm" onsubmit="handleDispenseMedicine(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Select Medicine Item *</label>
+          <select id="dispenseMedicineSelect" required onchange="updateDispensePricePreview(this.value)" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-amber-600 focus:outline-none font-medium">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Quantity to Dispense *</label>
+            <input type="number" id="dispenseQty" min="1" value="1" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-amber-600 focus:outline-none font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Unit Price (PKR)</label>
+            <input type="text" id="dispensePricePreview" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-700">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Assign to Patient (Optional)</label>
+          <select id="dispensePatientSelect" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-amber-600 focus:outline-none">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('dispenseModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow">Confirm Dispense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 6: ADMIT PATIENT TO KENNEL -->
+  <div id="admitModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeModal('admitModal')" class="absolute right-5 top-5 text-slate-400 hover:text-slate-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-hotel"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-800">Inpatient Kennel Admission</h2>
+          <p class="text-xs text-slate-500">Assign animal to dedicated kennel suite or pen</p>
+        </div>
+      </div>
+
+      <form id="admitPatientForm" onsubmit="handleAdmitPatient(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Select Animal Patient *</label>
+          <select id="admitPatientSelect" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-cyan-600 focus:outline-none">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Choose Available Kennel / Pen *</label>
+          <select id="admitKennelSelect" required class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-cyan-600 focus:outline-none font-medium">
+            <!-- Dynamically populated with free kennels -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Admission Diagnosis & Diet Instructions</label>
+          <textarea id="admitNotes" rows="2" placeholder="e.g. Post-orthopedic surgery observation. Soft food twice daily." class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-cyan-600 focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('admitModal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl shadow">Confirm Admission</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 7: OFFICIAL PRINTABLE TAX INVOICE RECEIPT -->
+  <div id="printReceiptModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+      <div class="no-print flex justify-end gap-2 mb-3 border-b pb-2">
+        <button onclick="window.print()" class="bg-siftp-teal text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-teal-600 flex items-center gap-1.5">
+          <i class="fa-solid fa-print"></i> Print Receipt
+        </button>
+        <button onclick="closeModal('printReceiptModal')" class="bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-slate-200">
+          Close
+        </button>
+      </div>
+
+      <!-- RECEIPT BODY (Print Friendly) -->
+      <div id="printModalContent" class="p-4 border border-dashed border-slate-300 rounded-2xl bg-white text-xs">
+        
+        <!-- Header -->
+        <div class="text-center pb-3 border-b border-slate-200">
+          <div class="font-extrabold text-lg text-siftp-navy tracking-wider">SIFTP VATERINARY HOSPITAL</div>
+          <p class="text-[10px] text-slate-500">Advanced Animal Health, Livestock Care & Diagnostics</p>
+          <p class="text-[10px] text-slate-500">Plot 14-C, Veterinary Complex, Sindh, Pakistan | Tel: 021-3456789</p>
+          <div class="mt-1.5 inline-block bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono font-bold text-[10px]">
+            OFFICIAL CLINICAL CASH RECEIPT
+          </div>
+        </div>
+
+        <!-- Receipt Meta -->
+        <div class="py-2.5 grid grid-cols-2 gap-2 text-[11px] border-b border-slate-200">
+          <div>
+            <p><span class="font-semibold text-slate-500">Invoice:</span> <span id="recInvoiceNo" class="font-mono font-bold">INV-2026-042</span></p>
+            <p><span class="font-semibold text-slate-500">Date:</span> <span id="recDate">22-Oct-2026 12:45 PM</span></p>
+            <p><span class="font-semibold text-slate-500">Payment:</span> <span id="recMode" class="font-semibold text-slate-800">Cash</span></p>
+          </div>
+          <div>
+            <p><span class="font-semibold text-slate-500">Patient:</span> <span id="recPatient" class="font-bold text-slate-800">Sheru (ANI-1001)</span></p>
+            <p><span class="font-semibold text-slate-500">Species/Breed:</span> <span id="recSpeciesBreed">Dog / German Shepherd</span></p>
+            <p><span class="font-semibold text-slate-500">Owner:</span> <span id="recOwner">Ahmed Ali (0300-1234567)</span></p>
+          </div>
+        </div>
+
+        <!-- Line items table -->
+        <div class="py-2">
+          <table class="w-full text-left text-[11px]">
+            <thead>
+              <tr class="border-b text-slate-500 font-semibold">
+                <th class="py-1">Description</th>
+                <th class="py-1 text-center">Qty</th>
+                <th class="py-1 text-right">Price</th>
+                <th class="py-1 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="recTableBody" class="divide-y divide-slate-100">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals summary -->
+        <div class="border-t border-slate-200 pt-2 space-y-1 text-[11px]">
+          <div class="flex justify-between text-slate-600">
+            <span>Subtotal:</span>
+            <span id="recSubtotal" class="font-semibold">₨ 0</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Discount Applied:</span>
+            <span id="recDiscount" class="font-semibold text-emerald-600">₨ 0</span>
+          </div>
+          <div class="flex justify-between font-black text-sm text-siftp-navy pt-1 border-t border-dashed">
+            <span>Net Paid Amount:</span>
+            <span id="recPaid">₨ 0</span>
+          </div>
+          <div class="flex justify-between text-slate-500 text-[10px]">
+            <span>Remaining Outstanding Balance:</span>
+            <span id="recBalance" class="font-bold text-rose-600">₨ 0</span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-4 pt-3 border-t border-slate-200 text-center text-[10px] text-slate-400">
+          <p>Thank you for trusting SIFTP Vaternity Hospital for your animal's health!</p>
+          <p class="font-mono mt-0.5">Powered by SIFTP Cloud Vaternity ERP (siftp.com)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- ============================================== -->
+  <!-- JAVASCRIPT LOGIC & LOCALSTORAGE PERSISTENCE    -->
+  <!-- ============================================== -->
+  <script>
+    /* ====================================================================
+       1. DEMO SEED DATA (Authentic Pakistani Veterinary & Livestock Cases)
+       ==================================================================== */
+    const INITIAL_SEED_DATA = {
+      patients: [
+        {
+          id: "ANI-1001",
+          name: "Sheru",
+          species: "Dog",
+          breed: "German Shepherd",
+          sex: "Male",
+          age: "3 Years",
+          weight: 24.5,
+          ownerName: "Ahmed Ali",
+          ownerPhone: "0300-1234567",
+          ownerAddress: "Gulshan-e-Iqbal, Karachi",
+          allergies: "Penicillin allergy",
+          registeredDate: "2026-10-22"
+        },
+        {
+          id: "ANI-1002",
+          name: "Moti",
+          species: "Goat",
+          breed: "Kamori Local",
+          sex: "Male",
+          age: "2 Years",
+          weight: 32.0,
+          ownerName: "Haji Rasheed",
+          ownerPhone: "0333-9876543",
+          ownerAddress: "Malir Cattle Colony, Karachi",
+          allergies: "None",
+          registeredDate: "2026-10-22"
+        },
+        {
+          id: "ANI-1003",
+          name: "Laila",
+          species: "Buffalo",
+          breed: "Kundi Dairy",
+          sex: "Female",
+          age: "4.5 Years",
+          weight: 480.0,
+          ownerName: "Saeed Brohi",
+          ownerPhone: "0301-5551234",
+          ownerAddress: "Thatta Farm Road, Sindh",
+          allergies: "None",
+          registeredDate: "2026-10-21"
+        },
+        {
+          id: "ANI-1004",
+          name: "Simba",
+          species: "Cat",
+          breed: "Persian Longhair",
+          sex: "Neutered Male",
+          age: "1.5 Years",
+          weight: 4.2,
+          ownerName: "Dr. Zainab",
+          ownerPhone: "0321-4449876",
+          ownerAddress: "Clifton Block 4, Karachi",
+          allergies: "Sensitive stomach",
+          registeredDate: "2026-10-20"
+        }
+      ],
+      queue: [
+        {
+          token: "T-101",
+          patientId: "ANI-1001",
+          patientName: "Sheru",
+          species: "Dog",
+          breed: "German Shepherd",
+          ownerName: "Ahmed Ali",
+          department: "General OPD",
+          doctor: "Dr. Fahad Khan",
+          reason: "Persistent fever & reduced appetite",
+          status: "Waiting",
+          time: "10:15 AM"
+        },
+        {
+          token: "T-102",
+          patientId: "ANI-1002",
+          patientName: "Moti",
+          species: "Goat",
+          breed: "Kamori Local",
+          ownerName: "Haji Rasheed",
+          department: "General OPD",
+          doctor: "Dr. Ayesha Baloch",
+          reason: "Rumen bloat & indigestion",
+          status: "Waiting",
+          time: "10:30 AM"
+        },
+        {
+          token: "T-103",
+          patientId: "ANI-1004",
+          patientName: "Simba",
+          species: "Cat",
+          breed: "Persian",
+          ownerName: "Dr. Zainab",
+          department: "Vaccination",
+          doctor: "Dr. Fahad Khan",
+          reason: "Feline Tricat Annual Booster",
+          status: "Waiting",
+          time: "11:00 AM"
+        }
+      ],
+      consultations: [
+        {
+          id: "CON-801",
+          patientId: "ANI-1003",
+          patientName: "Laila",
+          species: "Buffalo",
+          date: "2026-10-22 09:30 AM",
+          doctor: "Dr. Ayesha Baloch",
+          temp: 102.8,
+          weight: 480,
+          heartRate: 72,
+          respRate: 18,
+          complaint: "Sub-clinical Mastitis and decreased milk yield in right hind quarter",
+          exam: "Right teat swollen and warm, California Mastitis Test (CMT) positive (+2)",
+          diagnosis: "Acute Coliform Mastitis",
+          treatment: "Intramammary Ceftiofur infusion + Flunixin Meglumine injection",
+          prescription: [
+            { item: "Intramammary Infusion", dosage: "1 tube q12h", duration: "3 days" },
+            { item: "Flunixin Meglumine 50ml", dosage: "15ml IM OD", duration: "2 days" }
+          ],
+          followUp: "2026-10-25"
+        }
+      ],
+      vaccinations: [
+        {
+          id: "VAC-501",
+          patientId: "ANI-1001",
+          patientName: "Sheru",
+          species: "Dog",
+          ownerName: "Ahmed Ali",
+          ownerPhone: "0300-1234567",
+          vaccineName: "Rabies Monovalent (Inactivated)",
+          batch: "RB-8890",
+          adminDate: "2025-10-22",
+          nextDueDate: "2026-10-22",
+          doctor: "Dr. Fahad Khan",
+          status: "Due Today"
+        },
+        {
+          id: "VAC-502",
+          patientId: "ANI-1002",
+          patientName: "Moti",
+          species: "Goat",
+          ownerName: "Haji Rasheed",
+          ownerPhone: "0333-9876543",
+          vaccineName: "Enterotoxaemia + Tetanus",
+          batch: "ET-4412",
+          adminDate: "2026-05-10",
+          nextDueDate: "2026-11-10",
+          doctor: "Dr. Ayesha Baloch",
+          status: "Upcoming"
+        },
+        {
+          id: "VAC-503",
+          patientId: "ANI-1004",
+          patientName: "Simba",
+          species: "Cat",
+          ownerName: "Dr. Zainab",
+          ownerPhone: "0321-4449876",
+          vaccineName: "Feline Tricat Trio",
+          batch: "FC-991",
+          adminDate: "2025-09-15",
+          nextDueDate: "2026-09-15",
+          doctor: "Dr. Fahad Khan",
+          status: "Overdue"
+        }
+      ],
+      pharmacy: [
+        { id: "MED-1", name: "Oxytetracycline 20% L.A. (100ml)", category: "Antibiotic", batch: "OXY-902", expiry: "2027-08", stock: 24, purchasePrice: 320, salePrice: 450 },
+        { id: "MED-2", name: "Ivermectin 1% Injection (50ml)", category: "Anthelmintic", batch: "IVM-314", expiry: "2027-11", stock: 18, purchasePrice: 420, salePrice: 600 },
+        { id: "MED-3", name: "Amoxicillin + Clavulanic Acid 625mg", category: "Antibiotic", batch: "AMC-882", expiry: "2026-12", stock: 8, purchasePrice: 550, salePrice: 750 },
+        { id: "MED-4", name: "Meloxicam Injection 5mg/ml", category: "NSAID Analgesic", batch: "MLX-101", expiry: "2028-01", stock: 35, purchasePrice: 280, salePrice: 400 },
+        { id: "MED-5", name: "Calcium Borogluconate 450ml Infusion", category: "Metabolic", batch: "CBG-009", expiry: "2026-11", stock: 4, purchasePrice: 380, salePrice: 550 },
+        { id: "MED-6", name: "Rabies Inactivated Vaccine (Vial)", category: "Biologics", batch: "RB-8890", expiry: "2027-04", stock: 2, purchasePrice: 1100, salePrice: 1500 }
+      ],
+      kennels: [
+        { id: "K-1", name: "Canine Suite 1 (Small)", type: "Small Dog", status: "Occupied", patientName: "Bella (Pug)", owner: "Sana Tariq", admittedDate: "2026-10-21", notes: "Post eye surgery recovery" },
+        { id: "K-2", name: "Canine Suite 2 (Large)", type: "Large Dog", status: "Available", patientName: "-", owner: "-", admittedDate: "-", notes: "Sanitized & Ready" },
+        { id: "K-3", name: "Feline Ward Suite A", type: "Cat", status: "Occupied", patientName: "Milo (Persian)", owner: "Kashif Ali", admittedDate: "2026-10-22", notes: "IV hydration for FLUTD" },
+        { id: "K-4", name: "Livestock Pen #1", type: "Ruminant", status: "Occupied", patientName: "Sultan (Bull)", owner: "Waseem Farm", admittedDate: "2026-10-20", notes: "Hoof abscess drainage" },
+        { id: "K-5", name: "Isolation Quarantine", type: "Infectious", status: "Available", patientName: "-", owner: "-", admittedDate: "-", notes: "Negative pressure room" },
+        { id: "K-6", name: "Recovery Bay 6", type: "General", status: "Available", patientName: "-", owner: "-", admittedDate: "-", notes: "Sanitized & Ready" }
+      ],
+      invoices: [
+        { id: "INV-2026-040", patientId: "ANI-1003", ownerName: "Saeed Brohi", date: "2026-10-22", items: [{ name: "OPD Large Animal Consultation", price: 1500 }, { name: "Ceftiofur Infusion", price: 1200 }], subtotal: 2700, discount: 200, net: 2500, paid: 2500, balance: 0, paymentMode: "Cash" },
+        { id: "INV-2026-041", patientId: "ANI-1004", ownerName: "Dr. Zainab", date: "2026-10-22", items: [{ name: "Ultrasound Abdomen", price: 3500 }, { name: "Meloxicam Injection", price: 400 }], subtotal: 3900, discount: 0, net: 3900, paid: 3900, balance: 0, paymentMode: "Card" }
+      ]
+    };
+
+    /* ====================================================================
+       2. TRANSLATION DICTIONARY (English & Sindhi - سنڌي)
+       ==================================================================== */
+    const I18N = {
+      en: {
+        demoBadge: "DEMO MODE (Fictional Data)",
+        quickTour: "1-Click Guided Demo",
+        roleLabel: "Role:",
+        navCategoryMain: "Clinical Navigation",
+        menuDashboard: "Dashboard",
+        menuKiosk: "Reception Kiosk & Token",
+        menuRegistration: "Animal & Owner Registration",
+        menuVetConsultation: "Vet Consultation (EMR)",
+        menuVaccination: "Vaccination Center",
+        menuPharmacy: "Pharmacy & Stock",
+        menuBilling: "POS Billing & Cashier",
+        menuKennels: "Kennel & Admission",
+        menuReports: "Analytics & Reports",
+        activeQueue: "Active Token Queue",
+        dashGreeting: "Welcome to SIFTP Vaternity Hospital",
+        dashSubtitle: "Next-generation clinical workflow, veterinary diagnostics, inpatient boarding, and touch-POS billing for animal health centers.",
+        btnRegisterAnimal: "Register Animal",
+        btnGenerateToken: "Issue Queue Token",
+        btnConsultationRoom: "Consultation Queue",
+        btnPosBilling: "POS Billing",
+        kpiRegistered: "Registered Animals",
+        kpiWaiting: "Waiting in Queue",
+        kpiAvgWait: "Avg wait: 12 min",
+        kpiConsultations: "Today Consultations",
+        kpiVaccineDue: "Vaccines Due",
+        kpiKennels: "Admitted Inpatients",
+        kpiRevenue: "Today's Revenue",
+        kpiLowStock: "Low Stock Medicines",
+        kpiAppointments: "Appointments Booked",
+        liveQueueTitle: "Live Patient Waiting Queue",
+        liveQueueSubtitle: "Real-time status of checked-in animals awaiting veterinary consultation",
+        addToken: "Add Token",
+        colToken: "Token",
+        colPatient: "Animal & ID",
+        colSpecies: "Species",
+        colOwner: "Owner",
+        colDoctor: "Assigned Vet",
+        colStatus: "Status",
+        colAction: "Action",
+        revenueChartTitle: "Today's Revenue Breakdown",
+        revenueChartSub: "Consultation, Surgery, Pharmacy & Boarding",
+        vetsOnDuty: "Veterinarians on Duty",
+        kioskHeading: "Reception Touch-Kiosk & Queue Management",
+        kioskSubtitle: "Rapid one-touch check-in, token dispenser, and live TV waiting display",
+        btnNewToken: "Issue Next Token",
+        kioskTile1: "New Animal Register",
+        kioskTile2: "Quick Check-in",
+        kioskTile3: "Patient Search",
+        kioskTile4: "Cashier Billing",
+        tvBoardTitle: "Waiting Area Display Screen",
+        regTitle: "Animal & Owner Registration",
+        regSubtitle: "Register companion pets, large livestock, buffaloes, and working animals",
+        btnRegisterNewAnimal: "Register New Animal",
+        vetTitle: "Veterinarian Consultation Room (EMR)",
+        vetSubtitle: "Clinical examination, vitals, diagnosis, treatment plans, and Rx e-prescribing",
+        vetQueueHeading: "Active Waiting Consultation Queue",
+        consultHistoryHeading: "Recent Consultations & Clinical Notes History",
+        vacTitle: "Vaccination Protocol & Immunity Tracker",
+        vacSubtitle: "Rabies, DHPP, FMD (Foot & Mouth), HS, Enterotoxaemia schedules",
+        btnRecordVaccine: "Record Vaccine Dose",
+        pharmTitle: "Pharmacy & Medicine Stock",
+        pharmSubtitle: "Veterinary antibiotics, anthelmintics, vaccines, and surgical supplies",
+        btnDispense: "Dispense Rx",
+        btnAddItem: "Add Inventory",
+        posTitle: "Touch POS Billing & Cashier Desk",
+        posSubtitle: "Rapid service entry, automatic itemized calculation, partial payment & tax invoice receipt",
+        billToPatient: "Select Patient for Invoice",
+        quickItemsTitle: "Quick-Tap Clinical Services & Products",
+        cartTitle: "Invoice Breakdown",
+        clearCart: "Clear All",
+        subtotal: "Subtotal",
+        discount: "Discount (PKR)",
+        netPayable: "Net Payable",
+        payAndPrint: "Pay & Print Receipt",
+        saveOnly: "Save Only",
+        kennelTitle: "Kennel, Ward & Admission Management",
+        kennelSubtitle: "Small animal cages, feline suites, large livestock pens, and isolation quarantine",
+        btnAdmitAnimal: "Admit Patient to Kennel",
+        repTitle: "Hospital Analytics & Exportable Reports",
+        repSubtitle: "Financial audits, clinical case load, species distribution & pharmacy inventory status",
+        speciesBreakdown: "Patient Case Load by Species",
+        revenueSummary: "Financial Realization Summary",
+        regModalTitle: "Register New Animal & Owner",
+        tokenModalTitle: "Issue Clinical Queue Token",
+        consultModalTitle: "Clinical Consultation & EMR"
+      },
+      sd: {
+        demoBadge: "ڊيمو موڊ (خيالي ڊيٽا)",
+        quickTour: "هڪ-ڪلڪ گائيڊڊ ڊيمو",
+        roleLabel: "ڪردار:",
+        navCategoryMain: "ڪلينڪل نيويگيشن",
+        menuDashboard: "ڊيش بورڊ",
+        menuKiosk: "رسيپشن ڪيوسڪ ۽ ٽوڪن",
+        menuRegistration: "جانور ۽ مالڪ جو اندراج",
+        menuVetConsultation: "ڊاڪٽري معائنو (EMR)",
+        menuVaccination: "حفاظتي ٽيڪا (ويڪسين)",
+        menuPharmacy: "ميڊيڪل اسٽور ۽ اسٽاڪ",
+        menuBilling: "بلنگ ۽ ڪيشيئر (POS)",
+        menuKennels: "داخلا وارڊ ۽ ڪينلز",
+        menuReports: "رپورٽون ۽ تجزيو",
+        activeQueue: "انتظار گاهه ٽوڪن قطار",
+        dashGreeting: "SIFTP ويٽرنري اسپتال ۾ ڀلي ڪري آيا",
+        dashSubtitle: "جانورن ۽ مال مويشي جي اسپتال لاءِ جديد ڪلينڪل ۽ پي او ايس بلنگ سسٽم.",
+        btnRegisterAnimal: "جانور داخل ڪريو",
+        btnGenerateToken: "ٽوڪن جاري ڪريو",
+        btnConsultationRoom: "معائني واري قطار",
+        btnPosBilling: "ڪيش بلنگ",
+        kpiRegistered: "رجسٽرڊ جانور",
+        kpiWaiting: "انتظار ۾ مريض",
+        kpiAvgWait: "سراسري وقت: 12 منٽ",
+        kpiConsultations: "اڄ جا معائنا",
+        kpiVaccineDue: "ويڪسين جا ميعاد",
+        kpiKennels: "داخل مريض",
+        kpiRevenue: "اڄ جي آمدني",
+        kpiLowStock: "گهٽ اسٽاڪ دوائون",
+        kpiAppointments: "بڪ ڪيل اپائنٽمينٽس",
+        liveQueueTitle: "لائيو مريض انتظار قطار",
+        liveQueueSubtitle: "معائني لاءِ ويٺل بيمار جانورن جي سڌي حيثيت",
+        addToken: "ٽوڪن شامل ڪريو",
+        colToken: "ٽوڪن نمبر",
+        colPatient: "جانور ۽ شناختي نمبر",
+        colSpecies: "قسم (نسل)",
+        colOwner: "مالڪ جو نالو",
+        colDoctor: "مقرر ٿيل ويٽ",
+        colStatus: "حيثيت",
+        colAction: "ڪارروائي",
+        revenueChartTitle: "اڄوڪي آمدني جو حساب",
+        revenueChartSub: "معائنو، سرجري، دوائون ۽ داخلا",
+        vetsOnDuty: "ڊيوٽي تي ويٽرنري ڊاڪٽر",
+        kioskHeading: "رسيپشن ٽچ-ڪيوسڪ ۽ قطار جو انتظام",
+        kioskSubtitle: "فوري ٽوڪن پرنٽنگ ۽ ويٽنگ ايريا ٽي وي اسڪرين",
+        btnNewToken: "نئون ٽوڪن ڏيو",
+        kioskTile1: "نئون جانور داخل ڪريو",
+        kioskTile2: "فوري چيڪ ان",
+        kioskTile3: "مريض ڳوليو",
+        kioskTile4: "ڪيشيئر بلنگ",
+        tvBoardTitle: "انتظار گاهه ڊسپلي اسڪرين",
+        regTitle: "جانور ۽ مالڪ جي رجسٽريشن",
+        regSubtitle: "گھريلو پالتو جانور ۽ وڏو مال مويشي داخل ڪريو",
+        btnRegisterNewAnimal: "نئون جانور رجسٽر ڪريو",
+        vetTitle: "ڊاڪٽر جي معائني جو ڪمرو (EMR)",
+        vetSubtitle: "نبض، بخار، تشخيص، علاج جو پلان ۽ نسخي سازي",
+        vetQueueHeading: "معائني لاءِ ويٺل مريض جانور",
+        consultHistoryHeading: "اڄ جا مڪمل ٿيل ڪلينڪل معائنا",
+        vacTitle: "حفاظتي ٽيڪا ۽ ويڪسين رڪارڊ",
+        vacSubtitle: "ٻائڙي، منهن-کھر، ڳل-گهوٽو ۽ آنڊن جي سوجن جا ٽيڪا",
+        btnRecordVaccine: "ٽيڪو داخل ڪريو",
+        pharmTitle: "فارميسي ۽ دوائن جو اسٽاڪ",
+        pharmSubtitle: "ويٽرنري اينٽي بائيوٽڪس، سرجيڪل سامان ۽ انجيڪشنون",
+        btnDispense: "دوا جاري ڪريو",
+        btnAddItem: "اسٽاڪ وڌايو",
+        posTitle: "ٽچ POS بلنگ ۽ ڪيش ڊيسڪ",
+        posSubtitle: "خدمتون چونڊيو، خودڪار بل تيار ڪريو ۽ پرنٽ رسيد وٺو",
+        billToPatient: "بل لاءِ مريض جانور چونڊيو",
+        quickItemsTitle: "فوري چونڊ جون خدمتون ۽ دوائون",
+        cartTitle: "بل جو تفصيل",
+        clearCart: "خالي ڪريو",
+        subtotal: "ڪل رقم",
+        discount: "رعايت (رپيا)",
+        netPayable: "واجب الادا رقم",
+        payAndPrint: "پيسا وٺو ۽ رسيد پرنٽ ڪريو",
+        saveOnly: "صرف محفوظ ڪريو",
+        kennelTitle: "وارڊ، ڪينلز ۽ داخلا جو انتظام",
+        kennelSubtitle: "ننڍن جانورن جا ڪيج، الڳ ڪمرا ۽ مال مويشي جا واڙا",
+        btnAdmitAnimal: "جانور کي وارڊ ۾ داخل ڪريو",
+        repTitle: "اسپتال تجزيو ۽ رپورٽون",
+        repSubtitle: "مالي حساب ڪتاب، مريضن جو نسل وار تناسب ۽ تفصيل",
+        speciesBreakdown: "نسل موجب مريضن جو تعداد",
+        revenueSummary: "مالي وصولي جو تت",
+        regModalTitle: "نئون جانور ۽ مالڪ داخل ڪريو",
+        tokenModalTitle: "ڪلينڪل ٽوڪن جاري ڪريو",
+        consultModalTitle: "ڪلينڪل معائنو ۽ نسخي سازي"
+      }
+    };
+
+    /* ====================================================================
+       3. STATE MANAGEMENT & LOCALSTORAGE ENGINE
+       ==================================================================== */
+    let currentLanguage = 'en';
+    let currentRole = 'admin';
+    let appState = {};
+    let posCart = [];
+
+    function loadState() {
+      const stored = localStorage.getItem('siftp_vaternity_state');
+      if (stored) {
+        try {
+          appState = JSON.parse(stored);
+        } catch (e) {
+          appState = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
+        }
+      } else {
+        appState = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
+        saveState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem('siftp_vaternity_state', JSON.stringify(appState));
+      updateGlobalCounters();
+    }
+
+    function resetDemoData() {
+      if (confirm("Reset all records to fresh fictional SIFTP demo data?")) {
+        appState = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
+        saveState();
+        posCart = [];
+        renderAllModules();
+        showToast("Demo data successfully restored to default state!", "success");
+      }
+    }
+
+    /* ====================================================================
+       4. LANGUAGE & TRANSLATION LOGIC (Sindhi RTL & English LTR)
+       ==================================================================== */
+    function toggleLanguage() {
+      currentLanguage = currentLanguage === 'en' ? 'sd' : 'en';
+      applyLanguage(currentLanguage);
+    }
+
+    function applyLanguage(lang) {
+      document.body.dir = lang === 'sd' ? 'rtl' : 'ltr';
+      document.getElementById('currentLangLabel').textContent = lang === 'sd' ? 'English' : 'سنڌي (Sindhi)';
+      
+      // Update all elements with data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[lang] && I18N[lang][key]) {
+          el.textContent = I18N[lang][key];
+        }
+      });
+    }
+
+    /* ====================================================================
+       5. ROLE-BASED ACCESS CONTROL (DEMO MODE)
+       ==================================================================== */
+    function changeUserRole(role) {
+      currentRole = role;
+      const roleBadge = document.getElementById('currentRoleBadge');
+      const roleTitles = {
+        admin: 'Role: Administrator',
+        reception: 'Role: Receptionist',
+        vet: 'Role: Veterinarian',
+        pharmacy: 'Role: Pharmacy Staff',
+        cashier: 'Role: Cashier'
+      };
+      roleBadge.textContent = roleTitles[role] || 'Role: Staff';
+
+      // Highlight primary tab for role
+      if (role === 'vet') switchTab('vetDashboard');
+      else if (role === 'reception') switchTab('kiosk');
+      else if (role === 'pharmacy') switchTab('pharmacy');
+      else if (role === 'cashier') switchTab('billing');
+      else switchTab('dashboard');
+
+      showToast(`Switched to ${roleTitles[role]} view. Available permissions updated.`, "info");
+    }
+
+    /* ====================================================================
+       6. NAVIGATION & TAB SWITCHING
+       ==================================================================== */
+    function switchTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+      
+      // Show targeted tab
+      const targetSec = document.getElementById('tab-' + tabId);
+      if (targetSec) {
+        targetSec.classList.remove('hidden');
+        targetSec.classList.remove('fade-enter');
+        void targetSec.offsetWidth; // trigger reflow
+        targetSec.classList.add('fade-enter');
+      }
+
+      // Update sidebar active state
+      document.querySelectorAll('.sidebar-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.classList.add('bg-siftp-teal/10', 'text-siftp-teal', 'font-bold');
+          btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        } else {
+          btn.classList.remove('bg-siftp-teal/10', 'text-siftp-teal', 'font-bold');
+          btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+        }
+      });
+
+      // Close mobile sidebar if open
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.add('-translate-x-full');
+      }
+    }
+
+    /* ====================================================================
+       7. MODULE RENDERERS
+       ==================================================================== */
+
+    // Render Dashboard Queue Table & Live Cards
+    function renderDashboardQueue() {
+      const tbody = document.getElementById('dashboardQueueTableBody');
+      const waitingList = appState.queue.filter(q => q.status === 'Waiting');
+      
+      tbody.innerHTML = '';
+      if (waitingList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">No patients waiting in queue. All clear!</td></tr>`;
+        return;
+      }
+
+      waitingList.forEach(q => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono font-bold text-siftp-teal text-xs">${q.token}</td>
+          <td class="py-2.5 px-3 font-bold text-slate-800">${q.patientName} <span class="text-[10px] text-slate-400 block font-normal">${q.patientId}</span></td>
+          <td class="py-2.5 px-3">${q.species} <span class="text-[10px] text-slate-400">(${q.breed})</span></td>
+          <td class="py-2.5 px-3">${q.ownerName}</td>
+          <td class="py-2.5 px-3">${q.doctor}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold text-[10px]">${q.status}</span></td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="startConsultationFromToken('${q.token}')" class="bg-siftp-teal hover:bg-teal-600 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] transition shadow-sm">
+              <i class="fa-solid fa-stethoscope mr-1"></i> Call Patient
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update TV Waiting Board on Kiosk Tab
+      renderKioskTokenBoard();
+    }
+
+    // Render Waiting TV Board
+    function renderKioskTokenBoard() {
+      const container = document.getElementById('kioskTokenCardsGrid');
+      const waitingList = appState.queue.filter(q => q.status === 'Waiting');
+      container.innerHTML = '';
+
+      if (waitingList.length === 0) {
+        container.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400">Waiting Area Empty. Ready to receive next animal.</div>`;
+        return;
+      }
+
+      waitingList.forEach((q, idx) => {
+        const card = document.createElement('div');
+        const isNext = idx === 0;
+        card.className = `p-4 rounded-xl border ${isNext ? 'bg-siftp-teal/20 border-siftp-teal ring-2 ring-siftp-teal' : 'bg-slate-800/80 border-slate-700'} text-white shadow relative`;
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-2xl font-mono font-black text-amber-300">${q.token}</span>
+            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${isNext ? 'bg-emerald-500 text-white animate-pulse' : 'bg-slate-700 text-slate-300'}">
+              ${isNext ? 'Calling Now' : 'In Line'}
+            </span>
+          </div>
+          <div class="mt-2">
+            <div class="text-base font-bold">${q.patientName} (${q.species})</div>
+            <div class="text-xs text-slate-300">Owner: ${q.ownerName}</div>
+            <div class="text-[11px] text-teal-300 mt-1 flex items-center gap-1">
+              <i class="fa-solid fa-user-doctor"></i> ${q.doctor}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render Patient Directory Cards
+    function renderPatientCards(list = appState.patients) {
+      const container = document.getElementById('patientCardsGrid');
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400">No animal records match your search criteria.</div>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition relative flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold">
+                  <i class="fa-solid ${getSpeciesIcon(p.species)}"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-800 text-sm">${p.name}</h3>
+                  <span class="font-mono text-[10px] text-siftp-teal font-bold">${p.id}</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${p.species}</span>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+              <div><span class="text-slate-400">Breed:</span> <span class="font-medium text-slate-700">${p.breed || 'Local'}</span></div>
+              <div><span class="text-slate-400">Sex:</span> <span class="font-medium text-slate-700">${p.sex}</span></div>
+              <div><span class="text-slate-400">Age:</span> <span class="font-medium text-slate-700">${p.age}</span></div>
+              <div><span class="text-slate-400">Weight:</span> <span class="font-medium text-slate-700">${p.weight} kg</span></div>
+            </div>
+
+            <div class="mt-2.5 pt-2 border-t border-slate-100 text-xs">
+              <div class="text-slate-700 font-semibold flex items-center justify-between">
+                <span><i class="fa-solid fa-user text-slate-400 mr-1"></i> ${p.ownerName}</span>
+                <span class="text-slate-500 font-mono text-[11px]"><i class="fa-solid fa-phone text-slate-400 mr-0.5"></i> ${p.ownerPhone}</span>
+              </div>
+              ${p.allergies && p.allergies !== 'None' ? `<div class="mt-1 text-[11px] text-rose-600 bg-rose-50 px-2 py-0.5 rounded font-medium"><i class="fa-solid fa-circle-exclamation mr-1"></i> ${p.allergies}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <button onclick="quickCheckInPatient('${p.id}')" class="flex-1 bg-siftp-teal/10 hover:bg-siftp-teal/20 text-siftp-teal font-bold text-xs py-1.5 rounded-lg transition">
+              <i class="fa-solid fa-ticket mr-1"></i> Issue Token
+            </button>
+            <button onclick="openPatientHistory('${p.id}')" class="px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-1.5 rounded-lg transition font-medium">
+              History
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function getSpeciesIcon(species) {
+      switch(species) {
+        case 'Dog': return 'fa-dog';
+        case 'Cat': return 'fa-cat';
+        case 'Horse': return 'fa-horse';
+        case 'Bird': return 'fa-dove';
+        case 'Cattle':
+        case 'Buffalo':
+        case 'Goat':
+        case 'Sheep': return 'fa-cow';
+        default: return 'fa-paw';
+      }
+    }
+
+    // Render Veterinarian Waiting Queue Cards
+    function renderVetQueue() {
+      const container = document.getElementById('vetQueueGrid');
+      const waitingList = appState.queue.filter(q => q.status === 'Waiting');
+      container.innerHTML = '';
+
+      if (waitingList.length === 0) {
+        container.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400">All consultation queues cleared! Ready for new patients.</div>`;
+        return;
+      }
+
+      waitingList.forEach(q => {
+        const patient = appState.patients.find(p => p.id === q.patientId) || {};
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-siftp-teal transition shadow-sm flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono font-black text-sm bg-teal-100 text-siftp-teal px-2 py-0.5 rounded">${q.token}</span>
+              <span class="text-[11px] font-semibold text-slate-400"><i class="fa-regular fa-clock"></i> ${q.time}</span>
+            </div>
+            
+            <h3 class="text-base font-extrabold text-slate-800">${q.patientName}</h3>
+            <p class="text-xs text-slate-500">${patient.id || q.patientId} • ${q.species} (${patient.breed || 'Breed'}) • ${patient.weight || '--'} kg</p>
+            
+            <div class="mt-2 bg-slate-50 p-2 rounded-xl text-xs text-slate-700">
+              <span class="font-bold text-slate-500 block text-[10px] uppercase">Reason for Visit:</span>
+              <p class="font-medium text-slate-800">${q.reason || 'General checkup'}</p>
+            </div>
+
+            ${patient.allergies && patient.allergies !== 'None' ? `
+              <div class="mt-2 text-[10px] text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded font-semibold">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Caution: ${patient.allergies}
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="mt-4 pt-3 border-t flex gap-2">
+            <button onclick="startConsultationFromToken('${q.token}')" class="flex-1 bg-siftp-teal hover:bg-teal-600 text-white font-bold text-xs py-2 rounded-xl shadow transition">
+              <i class="fa-solid fa-stethoscope mr-1"></i> Start Consultation
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render Completed Consultations History
+    function renderConsultationHistory() {
+      const tbody = document.getElementById('consultationHistoryTableBody');
+      tbody.innerHTML = '';
+
+      if (appState.consultations.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-slate-400">No consultations recorded yet.</td></tr>`;
+        return;
+      }
+
+      appState.consultations.slice().reverse().forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 border-b border-slate-100";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 text-slate-500">${c.date}</td>
+          <td class="py-2.5 px-3 font-mono font-bold text-siftp-teal">${c.patientId}</td>
+          <td class="py-2.5 px-3 font-bold text-slate-800">${c.patientName}</td>
+          <td class="py-2.5 px-3">${c.species}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-800">${c.diagnosis}</td>
+          <td class="py-2.5 px-3 text-slate-600 max-w-xs truncate">${c.treatment}</td>
+          <td class="py-2.5 px-3">${c.doctor}</td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="viewConsultationNote('${c.id}')" class="text-siftp-teal hover:underline font-semibold">View Note</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render Vaccination Registry
+    function renderVaccinations(list = appState.vaccinations) {
+      const tbody = document.getElementById('vaccineTableBody');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-slate-400">No vaccination records found.</td></tr>`;
+        return;
+      }
+
+      list.forEach(v => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 border-b border-slate-100";
+        
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-[10px]">Current</span>`;
+        if (v.status === 'Due Today' || v.status === 'Upcoming') {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold text-[10px]">Due Soon</span>`;
+        } else if (v.status === 'Overdue') {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-semibold text-[10px]">Overdue Alert</span>`;
+        }
+
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono font-bold text-siftp-teal">${v.patientId}</td>
+          <td class="py-2.5 px-3 font-bold text-slate-800">${v.patientName} <span class="text-[10px] text-slate-400 block">${v.species}</span></td>
+          <td class="py-2.5 px-3">${v.ownerName} <span class="text-[10px] text-slate-400 block">${v.ownerPhone}</span></td>
+          <td class="py-2.5 px-3 font-semibold text-purple-900">${v.vaccineName}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-500">${v.batch}</td>
+          <td class="py-2.5 px-3 text-slate-600">${v.adminDate}</td>
+          <td class="py-2.5 px-3 font-bold text-slate-800">${v.nextDueDate}</td>
+          <td class="py-2.5 px-3">${statusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render Pharmacy Stock Table
+    function renderPharmacy(list = appState.pharmacy) {
+      const tbody = document.getElementById('pharmacyTableBody');
+      tbody.innerHTML = '';
+
+      list.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 border-b border-slate-100";
+        
+        const isLow = m.stock <= 5;
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-slate-800">${m.name}</td>
+          <td class="py-2.5 px-3 text-slate-500">${m.category}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-500">${m.batch}</td>
+          <td class="py-2.5 px-3 text-slate-600">${m.expiry}</td>
+          <td class="py-2.5 px-3 font-black ${isLow ? 'text-rose-600' : 'text-slate-800'}">${m.stock} Units</td>
+          <td class="py-2.5 px-3 text-slate-500">₨ ${m.purchasePrice}</td>
+          <td class="py-2.5 px-3 font-bold text-slate-800">₨ ${m.salePrice}</td>
+          <td class="py-2.5 px-3">
+            ${isLow ? '<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold text-[10px]">Low Stock</span>' : '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-semibold text-[10px]">Adequate</span>'}
+          </td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="quickDispenseMedicine('${m.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold px-2 py-1 rounded text-[10px] transition">
+              Dispense
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render Kennel Suites Grid
+    function renderKennels() {
+      const container = document.getElementById('kennelsGrid');
+      container.innerHTML = '';
+
+      appState.kennels.forEach(k => {
+        const isOccupied = k.status === 'Occupied';
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border-2 ${isOccupied ? 'bg-white border-amber-300' : 'bg-slate-50/70 border-slate-200'} shadow-sm transition flex flex-col justify-between`;
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-700">${k.name}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isOccupied ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                ${k.status}
+              </span>
+            </div>
+            
+            <div class="text-xs text-slate-400 mb-2">Category: ${k.type}</div>
+
+            ${isOccupied ? `
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
+                <p class="font-bold text-slate-800">${k.patientName}</p>
+                <p class="text-[11px] text-slate-500">Owner: ${k.owner}</p>
+                <p class="text-[10px] text-slate-400 mt-1">Admitted: ${k.admittedDate}</p>
+                <p class="text-[11px] text-slate-600 mt-1 italic font-medium">"${k.notes}"</p>
+              </div>
+            ` : `
+              <div class="py-6 text-center text-slate-400 text-xs">
+                <i class="fa-solid fa-box-open text-2xl text-slate-300 mb-1 block"></i>
+                Ready for inpatient admission
+              </div>
+            `}
+          </div>
+
+          <div class="mt-3 pt-2 border-t border-slate-100">
+            ${isOccupied ? `
+              <button onclick="dischargeKennel('${k.id}')" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs py-1.5 rounded-xl transition">
+                Discharge & Sanitize
+              </button>
+            ` : `
+              <button onclick="admitToSpecificKennel('${k.id}')" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs py-1.5 rounded-xl shadow transition">
+                Admit Patient Here
+              </button>
+            `}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render POS Cart & Calculation
+    function renderPosCart() {
+      const container = document.getElementById('posCartItemsList');
+      container.innerHTML = '';
+
+      if (posCart.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-400 italic">No services or medicines added to invoice. Tap items on the left to add.</div>`;
+      } else {
+        posCart.forEach((item, index) => {
+          const div = document.createElement('div');
+          div.className = "flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100";
+          div.innerHTML = `
+            <div>
+              <p class="font-bold text-slate-800">${item.name}</p>
+              <p class="text-[10px] text-slate-400">${item.category} • ₨ ${item.price} x ${item.qty}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900">₨ ${item.price * item.qty}</span>
+              <button onclick="removePosItem(${index})" class="text-slate-400 hover:text-rose-600 p-1">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      calculatePosTotals();
+    }
+
+    function calculatePosTotals() {
+      const subtotal = posCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const discount = parseFloat(document.getElementById('posDiscountInput').value) || 0;
+      const netTotal = Math.max(0, subtotal - discount);
+
+      document.getElementById('posSubtotal').textContent = `₨ ${subtotal.toLocaleString()}`;
+      document.getElementById('posNetTotal').textContent = `₨ ${netTotal.toLocaleString()}`;
+
+      // Default paid amount to full net total
+      const paidInput = document.getElementById('posPaidAmount');
+      if (!paidInput.value || parseFloat(paidInput.value) === 0) {
+        paidInput.value = netTotal;
+      }
+      calculateBalance();
+    }
+
+    function calculateBalance() {
+      const subtotal = posCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const discount = parseFloat(document.getElementById('posDiscountInput').value) || 0;
+      const netTotal = Math.max(0, subtotal - discount);
+      const paid = parseFloat(document.getElementById('posPaidAmount').value) || 0;
+      const balance = Math.max(0, netTotal - paid);
+
+      document.getElementById('posRemainingBalance').textContent = `₨ ${balance.toLocaleString()}`;
+    }
+
+    // Render Analytics Reports Screen
+    function renderReports() {
+      // Calculate species breakdown
+      const speciesCounts = {};
+      appState.patients.forEach(p => {
+        speciesCounts[p.species] = (speciesCounts[p.species] || 0) + 1;
+      });
+
+      const totalPatients = appState.patients.length || 1;
+      const container = document.getElementById('speciesReportBars');
+      container.innerHTML = '';
+
+      for (const [species, count] of Object.entries(speciesCounts)) {
+        const pct = Math.round((count / totalPatients) * 100);
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div class="flex justify-between text-slate-600 mb-1">
+            <span class="font-semibold">${species}</span>
+            <span>${count} (${pct}%)</span>
+          </div>
+          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+            <div class="bg-siftp-teal h-full" style="width: ${pct}%"></div>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+
+      // Total revenue summary
+      const totalBilled = appState.invoices.reduce((sum, inv) => sum + inv.net, 0);
+      const totalPaid = appState.invoices.reduce((sum, inv) => sum + inv.paid, 0);
+      const totalBal = appState.invoices.reduce((sum, inv) => sum + inv.balance, 0);
+
+      document.getElementById('repTotalBilled').textContent = `₨ ${totalBilled.toLocaleString()}`;
+      document.getElementById('repTotalReceived').textContent = `₨ ${totalPaid.toLocaleString()}`;
+      document.getElementById('repOutstanding').textContent = `₨ ${totalBal.toLocaleString()}`;
+    }
+
+    // Update Global KPIs & Select Dropdowns
+    function updateGlobalCounters() {
+      document.getElementById('kpi-total-animals').textContent = appState.patients.length;
+      
+      const waitingCount = appState.queue.filter(q => q.status === 'Waiting').length;
+      document.getElementById('kpi-waiting-queue').textContent = waitingCount;
+      document.getElementById('sidebarQueueCount').textContent = `${waitingCount} Waiting`;
+      document.getElementById('queueProgressBar').style.width = `${Math.min(100, waitingCount * 25)}%`;
+
+      document.getElementById('kpi-completed-consults').textContent = appState.consultations.length;
+      document.getElementById('kpi-vaccines-due').textContent = appState.vaccinations.filter(v => v.status !== 'Completed').length;
+      
+      const occupiedKennels = appState.kennels.filter(k => k.status === 'Occupied').length;
+      document.getElementById('kpi-admitted').textContent = `${occupiedKennels} / ${appState.kennels.length}`;
+
+      const lowStockCount = appState.pharmacy.filter(m => m.stock <= 5).length;
+      document.getElementById('kpi-low-stock').textContent = lowStockCount;
+
+      const totalRevenue = appState.invoices.reduce((sum, inv) => sum + inv.paid, 0);
+      document.getElementById('kpi-revenue').textContent = `₨ ${totalRevenue.toLocaleString()}`;
+
+      // Populate Selects
+      populatePatientDropdowns();
+    }
+
+    function populatePatientDropdowns() {
+      const patientSelects = [
+        document.getElementById('tokenPatientSelect'),
+        document.getElementById('billingPatientSelect'),
+        document.getElementById('vacPatientSelect'),
+        document.getElementById('admitPatientSelect'),
+        document.getElementById('dispensePatientSelect')
+      ];
+
+      patientSelects.forEach(select => {
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- Choose Animal Patient --</option>';
+        appState.patients.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = `${p.id} - ${p.name} (${p.species} / ${p.breed}) - Owner: ${p.ownerName}`;
+          select.appendChild(opt);
+        });
+        if (currentVal) select.value = currentVal;
+      });
+
+      // Populate Medicine Select
+      const medSelect = document.getElementById('dispenseMedicineSelect');
+      if (medSelect) {
+        medSelect.innerHTML = '<option value="">-- Select Inventory Medicine --</option>';
+        appState.pharmacy.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = `${m.name} (Stock: ${m.stock}) - ₨ ${m.salePrice}`;
+          medSelect.appendChild(opt);
+        });
+      }
+
+      // Populate Available Kennels Select
+      const kennelSelect = document.getElementById('admitKennelSelect');
+      if (kennelSelect) {
+        kennelSelect.innerHTML = '<option value="">-- Select Available Kennel --</option>';
+        appState.kennels.filter(k => k.status === 'Available').forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k.id;
+          opt.textContent = `${k.name} (${k.type})`;
+          kennelSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function renderAllModules() {
+      renderDashboardQueue();
+      renderPatientCards();
+      renderVetQueue();
+      renderConsultationHistory();
+      renderVaccinations();
+      renderPharmacy();
+      renderKennels();
+      renderPosCart();
+      renderReports();
+      updateGlobalCounters();
+    }
+
+    /* ====================================================================
+       8. USER ACTIONS & MODAL HANDLERS
+       ==================================================================== */
+
+    // Animal Registration
+    function openRegisterModal() {
+      const nextId = "ANI-" + (1000 + appState.patients.length + 1);
+      document.getElementById('nextPatientIdDisplay').textContent = nextId;
+      document.getElementById('registerAnimalForm').reset();
+      document.getElementById('registerModal').classList.remove('hidden');
+    }
+
+    function handleSaveAnimal(e) {
+      e.preventDefault();
+      const newId = "ANI-" + (1000 + appState.patients.length + 1);
+      
+      const newPatient = {
+        id: newId,
+        name: document.getElementById('regAnimalName').value.trim(),
+        species: document.getElementById('regSpecies').value,
+        breed: document.getElementById('regBreed').value.trim() || 'Local',
+        sex: document.getElementById('regSex').value,
+        age: document.getElementById('regAge').value.trim() || 'Unknown',
+        weight: parseFloat(document.getElementById('regWeight').value) || 0,
+        ownerName: document.getElementById('regOwnerName').value.trim(),
+        ownerPhone: document.getElementById('regOwnerPhone').value.trim(),
+        ownerAddress: document.getElementById('regOwnerAddress').value.trim(),
+        allergies: document.getElementById('regAllergies').value.trim() || 'None',
+        registeredDate: new Date().toISOString().split('T')[0]
+      };
+
+      appState.patients.push(newPatient);
+      saveState();
+      renderAllModules();
+      closeModal('registerModal');
+      showToast(`Patient ${newPatient.name} registered with ID ${newPatient.id}`, "success");
+
+      // Prompt to issue token immediately
+      quickCheckInPatient(newPatient.id);
+    }
+
+    // Token Generation
+    function openTokenModal() {
+      document.getElementById('issueTokenForm').reset();
+      populatePatientDropdowns();
+      document.getElementById('tokenModal').classList.remove('hidden');
+    }
+
+    function quickCheckInPatient(patientId) {
+      openTokenModal();
+      document.getElementById('tokenPatientSelect').value = patientId;
+    }
+
+    function handleIssueToken(e) {
+      e.preventDefault();
+      const patientId = document.getElementById('tokenPatientSelect').value;
+      const patient = appState.patients.find(p => p.id === patientId);
+
+      if (!patient) {
+        showToast("Please choose an animal patient.", "warning");
+        return;
+      }
+
+      const nextTokenNum = 100 + appState.queue.length + 1;
+      const tokenCode = `T-${nextTokenNum}`;
+
+      const newQueueItem = {
+        token: tokenCode,
+        patientId: patient.id,
+        patientName: patient.name,
+        species: patient.species,
+        breed: patient.breed,
+        ownerName: patient.ownerName,
+        department: document.getElementById('tokenDepartment').value,
+        doctor: document.getElementById('tokenDoctor').value,
+        reason: document.getElementById('tokenReason').value || 'Consultation',
+        status: "Waiting",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      appState.queue.push(newQueueItem);
+      saveState();
+      renderAllModules();
+      closeModal('tokenModal');
+      showToast(`Token ${tokenCode} issued for ${patient.name}. Assigned to ${newQueueItem.doctor}`, "success");
+    }
+
+    // Hospital Audio Chime
+    function playQueueChime() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+        gain1.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(ctx.currentTime);
+        osc1.stop(ctx.currentTime + 0.4);
+
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
+        gain2.gain.setValueAtTime(0.25, ctx.currentTime + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(ctx.currentTime + 0.15);
+        osc2.stop(ctx.currentTime + 0.7);
+      } catch (e) {}
+    }
+
+    // Veterinarian Consultation SOAP
+    function startConsultationFromToken(tokenCode) {
+      playQueueChime();
+      const qItem = appState.queue.find(q => q.token === tokenCode);
+      if (!qItem) return;
+
+      const patient = appState.patients.find(p => p.id === qItem.patientId) || {};
+
+      document.getElementById('consultTokenTag').textContent = qItem.token;
+      document.getElementById('consultPatientSummary').textContent = `${patient.id} — ${patient.name} (${patient.species} / ${patient.breed}) — Owner: ${patient.ownerName}`;
+      document.getElementById('consultPatientId').value = patient.id;
+      document.getElementById('consultTokenId').value = qItem.token;
+      
+      document.getElementById('consultComplaint').value = qItem.reason || '';
+      document.getElementById('consultWeight').value = patient.weight || '';
+      document.getElementById('consultTemp').value = '101.5';
+      document.getElementById('consultHeartRate').value = '90';
+      document.getElementById('consultRespRate').value = '24';
+      document.getElementById('consultExam').value = 'Alert, hydrated, mucous membranes pink, CRT < 2s.';
+      document.getElementById('consultDiagnosis').value = '';
+
+      // Reset Prescription Container with one blank row
+      document.getElementById('rxItemsContainer').innerHTML = '';
+      addRxItemRow();
+
+      document.getElementById('consultationModal').classList.remove('hidden');
+    }
+
+    function addRxItemRow() {
+      const container = document.getElementById('rxItemsContainer');
+      const row = document.createElement('div');
+      row.className = "flex items-center gap-2 text-xs";
+      row.innerHTML = `
+        <select class="rx-item-name flex-1 border border-slate-200 rounded-lg p-1.5 bg-white font-medium">
+          ${appState.pharmacy.map(m => `<option value="${m.name}">${m.name} (₨ ${m.salePrice})</option>`).join('')}
+          <option value="Custom Supportive Fluid">Normal Saline 1000ml IV</option>
+        </select>
+        <input type="text" placeholder="Dosage (e.g. 1 vial OD)" class="rx-item-dosage w-44 border border-slate-200 rounded-lg p-1.5 bg-white">
+        <input type="text" placeholder="Duration (e.g. 3 days)" class="rx-item-duration w-32 border border-slate-200 rounded-lg p-1.5 bg-white">
+        <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+      `;
+      container.appendChild(row);
+    }
+
+    function handleSaveConsultation(e) {
+      e.preventDefault();
+      const patientId = document.getElementById('consultPatientId').value;
+      const tokenId = document.getElementById('consultTokenId').value;
+      const patient = appState.patients.find(p => p.id === patientId);
+
+      // Collect Rx items
+      const rxItems = [];
+      document.querySelectorAll('#rxItemsContainer > div').forEach(row => {
+        const itemSelect = row.querySelector('.rx-item-name');
+        const dosageInput = row.querySelector('.rx-item-dosage');
+        const durationInput = row.querySelector('.rx-item-duration');
+        if (itemSelect && itemSelect.value) {
+          rxItems.push({
+            item: itemSelect.value,
+            dosage: dosageInput.value || 'As directed',
+            duration: durationInput.value || '3 days'
+          });
+        }
+      });
+
+      const newConsultation = {
+        id: "CON-" + (800 + appState.consultations.length + 1),
+        patientId: patient.id,
+        patientName: patient.name,
+        species: patient.species,
+        date: new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        doctor: "Dr. Fahad Khan",
+        temp: parseFloat(document.getElementById('consultTemp').value) || 101.5,
+        weight: parseFloat(document.getElementById('consultWeight').value) || patient.weight,
+        heartRate: parseInt(document.getElementById('consultHeartRate').value) || 90,
+        respRate: parseInt(document.getElementById('consultRespRate').value) || 24,
+        complaint: document.getElementById('consultComplaint').value,
+        exam: document.getElementById('consultExam').value,
+        diagnosis: document.getElementById('consultDiagnosis').value,
+        treatment: rxItems.map(r => r.item).join(", ") || 'Supportive therapy',
+        prescription: rxItems,
+        followUp: document.getElementById('consultFollowUp').value || 'None'
+      };
+
+      appState.consultations.push(newConsultation);
+
+      // Mark queue token as Completed
+      const qIndex = appState.queue.findIndex(q => q.token === tokenId);
+      if (qIndex !== -1) {
+        appState.queue[qIndex].status = "Completed";
+      }
+
+      saveState();
+      renderAllModules();
+      closeModal('consultationModal');
+      showToast(`Consultation record for ${patient.name} saved successfully!`, "success");
+
+      // Auto-load items into POS Billing for cashier checkout
+      posCart = [
+        { name: "Clinical OPD Consultation", price: 1000, category: "Consultation", qty: 1 }
+      ];
+      rxItems.forEach(rx => {
+        const med = appState.pharmacy.find(m => rx.item.includes(m.name));
+        posCart.push({
+          name: rx.item,
+          price: med ? med.salePrice : 500,
+          category: "Pharmacy",
+          qty: 1
+        });
+      });
+      document.getElementById('billingPatientSelect').value = patient.id;
+      renderPosCart();
+      switchTab('billing');
+      showToast("Items forwarded to POS Billing screen for invoice generation.", "info");
+    }
+
+    // Record Vaccination
+    function openVaccineModal() {
+      document.getElementById('recordVaccineForm').reset();
+      document.getElementById('vacAdminDate').value = new Date().toISOString().split('T')[0];
+      
+      // Default next due date 1 year from now
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      document.getElementById('vacDueDate').value = nextYear.toISOString().split('T')[0];
+      
+      populatePatientDropdowns();
+      document.getElementById('vaccineModal').classList.remove('hidden');
+    }
+
+    function handleSaveVaccine(e) {
+      e.preventDefault();
+      const patientId = document.getElementById('vacPatientSelect').value;
+      const patient = appState.patients.find(p => p.id === patientId);
+
+      const newVaccine = {
+        id: "VAC-" + (500 + appState.vaccinations.length + 1),
+        patientId: patient.id,
+        patientName: patient.name,
+        species: patient.species,
+        ownerName: patient.ownerName,
+        ownerPhone: patient.ownerPhone,
+        vaccineName: document.getElementById('vacName').value,
+        batch: document.getElementById('vacBatch').value,
+        adminDate: document.getElementById('vacAdminDate').value,
+        nextDueDate: document.getElementById('vacDueDate').value,
+        doctor: document.getElementById('vacVet').value,
+        status: "Upcoming"
+      };
+
+      appState.vaccinations.push(newVaccine);
+      saveState();
+      renderAllModules();
+      closeModal('vaccineModal');
+      showToast(`Vaccination protocol recorded for ${patient.name}. Booster reminder set for ${newVaccine.nextDueDate}`, "success");
+    }
+
+    // Pharmacy Dispense
+    function openDispenseModal() {
+      populatePatientDropdowns();
+      document.getElementById('dispenseMedicineForm').reset();
+      document.getElementById('dispenseModal').classList.remove('hidden');
+    }
+
+    function updateDispensePricePreview(medId) {
+      const med = appState.pharmacy.find(m => m.id === medId);
+      if (med) {
+        document.getElementById('dispensePricePreview').value = `₨ ${med.salePrice}`;
+      }
+    }
+
+    function quickDispenseMedicine(medId) {
+      openDispenseModal();
+      document.getElementById('dispenseMedicineSelect').value = medId;
+      updateDispensePricePreview(medId);
+    }
+
+    function handleDispenseMedicine(e) {
+      e.preventDefault();
+      const medId = document.getElementById('dispenseMedicineSelect').value;
+      const qty = parseInt(document.getElementById('dispenseQty').value) || 1;
+      const med = appState.pharmacy.find(m => m.id === medId);
+
+      if (!med) return;
+
+      if (med.stock < qty) {
+        showToast(`Insufficient stock! Only ${med.stock} units available.`, "warning");
+        return;
+      }
+
+      med.stock -= qty;
+      saveState();
+      renderAllModules();
+      closeModal('dispenseModal');
+      showToast(`Dispensed ${qty} units of ${med.name}. Stock updated.`, "success");
+    }
+
+    // Kennel Admission
+    function openAdmitModal() {
+      populatePatientDropdowns();
+      document.getElementById('admitModal').classList.remove('hidden');
+    }
+
+    function admitToSpecificKennel(kennelId) {
+      openAdmitModal();
+      document.getElementById('admitKennelSelect').value = kennelId;
+    }
+
+    function handleAdmitPatient(e) {
+      e.preventDefault();
+      const patientId = document.getElementById('admitPatientSelect').value;
+      const kennelId = document.getElementById('admitKennelSelect').value;
+      const notes = document.getElementById('admitNotes').value;
+
+      const patient = appState.patients.find(p => p.id === patientId);
+      const kennel = appState.kennels.find(k => k.id === kennelId);
+
+      if (!patient || !kennel) return;
+
+      kennel.status = "Occupied";
+      kennel.patientName = `${patient.name} (${patient.species})`;
+      kennel.owner = patient.ownerName;
+      kennel.admittedDate = new Date().toISOString().split('T')[0];
+      kennel.notes = notes || 'Under clinical observation';
+
+      saveState();
+      renderAllModules();
+      closeModal('admitModal');
+      showToast(`${patient.name} admitted to ${kennel.name}`, "success");
+    }
+
+    function dischargeKennel(kennelId) {
+      const kennel = appState.kennels.find(k => k.id === kennelId);
+      if (kennel && confirm(`Discharge patient from ${kennel.name} and mark sanitized?`)) {
+        kennel.status = "Available";
+        kennel.patientName = "-";
+        kennel.owner = "-";
+        kennel.admittedDate = "-";
+        kennel.notes = "Sanitized & Ready";
+        saveState();
+        renderAllModules();
+        showToast(`${kennel.name} discharged and ready for new occupant.`, "info");
+      }
+    }
+
+    // POS Cart Operations
+    function addPosItem(name, price, category) {
+      const existing = posCart.find(i => i.name === name);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        posCart.push({ name, price, category, qty: 1 });
+      }
+      renderPosCart();
+      showToast(`Added ${name} to invoice.`, "info");
+    }
+
+    function addCustomLineItem() {
+      const name = document.getElementById('customItemName').value.trim();
+      const price = parseFloat(document.getElementById('customItemPrice').value);
+      if (!name || isNaN(price) || price <= 0) {
+        showToast("Enter a valid description and price.", "warning");
+        return;
+      }
+      addPosItem(name, price, "Miscellaneous");
+      document.getElementById('customItemName').value = '';
+      document.getElementById('customItemPrice').value = '';
+    }
+
+    function removePosItem(index) {
+      posCart.splice(index, 1);
+      renderPosCart();
+    }
+
+    function clearPosCart() {
+      posCart = [];
+      renderPosCart();
+    }
+
+    function onSelectBillingPatient(patientId) {
+      const patient = appState.patients.find(p => p.id === patientId);
+      if (patient) {
+        showToast(`Billing patient: ${patient.name} (${patient.species})`, "info");
+      }
+    }
+
+    // POS Checkout & Receipt Generation
+    function processCheckout(andPrint = true) {
+      if (posCart.length === 0) {
+        showToast("Cart is empty! Add at least one item before checkout.", "warning");
+        return;
+      }
+
+      const patientId = document.getElementById('billingPatientSelect').value;
+      const patient = appState.patients.find(p => p.id === patientId) || {
+        id: "WALK-IN",
+        name: "General Client",
+        species: "Animal",
+        breed: "Local",
+        ownerName: "Cash Client",
+        ownerPhone: "0300-0000000"
+      };
+
+      const subtotal = posCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const discount = parseFloat(document.getElementById('posDiscountInput').value) || 0;
+      const net = Math.max(0, subtotal - discount);
+      const paid = parseFloat(document.getElementById('posPaidAmount').value) || net;
+      const balance = Math.max(0, net - paid);
+      const paymentMode = document.getElementById('posPaymentMode').value;
+      const invoiceNo = "INV-2026-" + (40 + appState.invoices.length + 1);
+
+      const invoiceRecord = {
+        id: invoiceNo,
+        patientId: patient.id,
+        ownerName: patient.ownerName,
+        date: new Date().toISOString().split('T')[0],
+        items: JSON.parse(JSON.stringify(posCart)),
+        subtotal,
+        discount,
+        net,
+        paid,
+        balance,
+        paymentMode
+      };
+
+      appState.invoices.push(invoiceRecord);
+      saveState();
+
+      if (andPrint) {
+        populatePrintReceipt(invoiceRecord, patient);
+        document.getElementById('printReceiptModal').classList.remove('hidden');
+      } else {
+        showToast(`Invoice ${invoiceNo} generated & payment recorded!`, "success");
+      }
+
+      // Reset Cart & Advance Invoice No
+      posCart = [];
+      renderPosCart();
+      document.getElementById('currentInvoiceNumber').textContent = "INV-2026-" + (40 + appState.invoices.length + 1);
+      renderAllModules();
+    }
+
+    function populatePrintReceipt(inv, patient) {
+      document.getElementById('recInvoiceNo').textContent = inv.id;
+      document.getElementById('recDate').textContent = new Date().toLocaleString();
+      document.getElementById('recMode').textContent = inv.paymentMode;
+      document.getElementById('recPatient').textContent = `${patient.name} (${patient.id})`;
+      document.getElementById('recSpeciesBreed').textContent = `${patient.species} / ${patient.breed || 'Standard'}`;
+      document.getElementById('recOwner').textContent = `${patient.ownerName} (${patient.ownerPhone})`;
+
+      const tbody = document.getElementById('recTableBody');
+      tbody.innerHTML = '';
+      inv.items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-1">${item.name}</td>
+          <td class="py-1 text-center font-mono">${item.qty}</td>
+          <td class="py-1 text-right font-mono">₨ ${item.price.toLocaleString()}</td>
+          <td class="py-1 text-right font-mono font-bold">₨ ${(item.price * item.qty).toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('recSubtotal').textContent = `₨ ${inv.subtotal.toLocaleString()}`;
+      document.getElementById('recDiscount').textContent = `₨ ${inv.discount.toLocaleString()}`;
+      document.getElementById('recPaid').textContent = `₨ ${inv.paid.toLocaleString()}`;
+      document.getElementById('recBalance').textContent = `₨ ${inv.balance.toLocaleString()}`;
+    }
+
+    // CSV Data Export Engine
+    function exportReportsToCSV(type) {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      let fileName = "siftp_vaternity_export.csv";
+
+      if (type === 'consultations') {
+        fileName = "SIFTP_Consultations_Report.csv";
+        csvContent += "Consultation ID,Patient ID,Animal Name,Species,Date,Doctor,Diagnosis,Prescribed Treatment\n";
+        appState.consultations.forEach(c => {
+          csvContent += `"${c.id}","${c.patientId}","${c.patientName}","${c.species}","${c.date}","${c.doctor}","${c.diagnosis}","${c.treatment.replace(/"/g, '""')}"\n`;
+        });
+      } else {
+        fileName = "SIFTP_Revenue_Invoices_Report.csv";
+        csvContent += "Invoice ID,Date,Patient ID,Owner,Subtotal (PKR),Discount,Net Total,Paid,Balance,Payment Method\n";
+        appState.invoices.forEach(inv => {
+          csvContent += `"${inv.id}","${inv.date}","${inv.patientId}","${inv.ownerName}",${inv.subtotal},${inv.discount},${inv.net},${inv.paid},${inv.balance},"${inv.paymentMode}"\n`;
+        });
+      }
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Exported ${fileName} successfully!`, "success");
+    }
+
+    /* ====================================================================
+       9. GUIDED DEMO PRESENTATION WALKTHROUGH
+       ==================================================================== */
+    function startGuidedDemo() {
+      const steps = [
+        "Step 1/5: Let's register a new animal patient or view existing registered animals.",
+        "Step 2/5: Check-in animal at Reception Kiosk and generate a live queue token.",
+        "Step 3/5: Veterinarian opens consultation room, examines patient, logs vitals & SOAP notes.",
+        "Step 4/5: Prescriptions automatically route to touch-POS Billing for itemized calculation.",
+        "Step 5/5: Cashier collects payment and prints a clinical tax invoice receipt."
+      ];
+
+      switchTab('registration');
+      showToast("Starting Guided 1-Click SIFTP Demo Walkthrough!", "info");
+      
+      setTimeout(() => {
+        openRegisterModal();
+        document.getElementById('regAnimalName').value = "Sultan";
+        document.getElementById('regSpecies').value = "Buffalo";
+        document.getElementById('regBreed').value = "Kundi Dairy";
+        document.getElementById('regOwnerName').value = "Waseem Farm";
+        document.getElementById('regOwnerPhone').value = "0300-8889922";
+        showToast("Auto-filled demo patient: Sultan (Dairy Buffalo). Saving...", "info");
+      }, 1000);
+    }
+
+    /* ====================================================================
+       10. UTILITIES, SEARCH FILTERS & HELPERS
+       ==================================================================== */
+    function filterPatientTable() {
+      const query = document.getElementById('patientSearchInput').value.toLowerCase();
+      const filtered = appState.patients.filter(p => 
+        p.id.toLowerCase().includes(query) ||
+        p.name.toLowerCase().includes(query) ||
+        p.breed.toLowerCase().includes(query) ||
+        p.ownerPhone.includes(query) ||
+        p.ownerName.toLowerCase().includes(query)
+      );
+      renderPatientCards(filtered);
+    }
+
+    function filterSpecies(species) {
+      document.querySelectorAll('.species-filter-btn').forEach(b => {
+        b.classList.remove('bg-siftp-navy', 'text-white');
+        b.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      event.target.classList.add('bg-siftp-navy', 'text-white');
+      event.target.classList.remove('bg-slate-100', 'text-slate-700');
+
+      if (species === 'all') {
+        renderPatientCards(appState.patients);
+      } else {
+        const filtered = appState.patients.filter(p => p.species.toLowerCase() === species.toLowerCase());
+        renderPatientCards(filtered);
+      }
+    }
+
+    function filterPharmacyTable() {
+      const q = document.getElementById('pharmacySearchInput').value.toLowerCase();
+      const filtered = appState.pharmacy.filter(m => m.name.toLowerCase().includes(q) || m.batch.toLowerCase().includes(q));
+      renderPharmacy(filtered);
+    }
+
+    function filterVaccines(type) {
+      if (type === 'all') {
+        renderVaccinations(appState.vaccinations);
+      } else {
+        renderVaccinations(appState.vaccinations.filter(v => v.status !== 'Completed'));
+      }
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let borderCol = "border-teal-500 bg-slate-900 text-white";
+      let icon = "fa-circle-info text-teal-400";
+      if (type === "success") {
+        borderCol = "border-emerald-500 bg-slate-900 text-white";
+        icon = "fa-circle-check text-emerald-400";
+      } else if (type === "warning") {
+        borderCol = "border-amber-500 bg-slate-900 text-white";
+        icon = "fa-triangle-exclamation text-amber-400";
+      }
+
+      toast.className = `p-3.5 rounded-xl border-l-4 shadow-xl text-xs flex items-center gap-2.5 max-w-sm pointer-events-auto fade-enter ${borderCol}`;
+      toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i> <span class="font-medium">${message}</span>`;
+      
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function updateClock() {
+      const clock = document.getElementById('liveClockDisplay');
+      if (clock) {
+        clock.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+    }
+
+    /* ====================================================================
+       11. INITIALIZATION ON WINDOW LOAD
+       ==================================================================== */
+    window.onload = function () {
+      loadState();
+      renderAllModules();
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // Mobile Menu Toggle
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      const sidebar = document.getElementById('sidebar');
+      if (mobileBtn && sidebar) {
+        mobileBtn.addEventListener('click', () => {
+          sidebar.classList.toggle('-translate-x-full');
+        });
+      }
+    };
+  </script>
+</body>
+</html>
