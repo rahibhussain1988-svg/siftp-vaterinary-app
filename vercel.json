@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    { "source": "/vaterinary/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/vaterinary/(.*)", "destination": "/$1" },
+    { "source": "/vaterinary", "destination": "/index.html" },
+    { "source": "/vaterniary/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/vaterniary/(.*)", "destination": "/$1" },
+    { "source": "/vaterniary", "destination": "/index.html" },
+    { "source": "/veterinary/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/veterinary/(.*)", "destination": "/$1" },
+    { "source": "/veterinary", "destination": "/index.html" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
